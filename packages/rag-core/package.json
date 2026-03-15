@@ -11,7 +11,8 @@
   "license": "ISC",
   "dependencies": {
     "@repo/shared-types": "workspace:*",
-    "dotenv": "^17.3.1"
+    "dotenv": "^17.3.1",
+    "openai": "^6.29.0"
   },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",

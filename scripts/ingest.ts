@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { processTextIntoChunks, insertChunks } from '../packages/rag-core';
+import { processTextIntoChunks, syncChunksWithEmbeddings } from '../packages/rag-core';
 
 async function runIngestion() {
     const filePath = path.join(__dirname, '../data/raw/sample1.txt');
@@ -13,7 +13,8 @@ async function runIngestion() {
 
         // 2. Push to Supabase
         try {
-            await insertChunks(chunks);
+            await syncChunksWithEmbeddings(chunks);
+            console.log("Ingestion complete")
         } catch (err) {
             console.error("Failed to ingest:", err);
         }
