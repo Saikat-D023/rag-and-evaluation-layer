@@ -1,0 +1,195 @@
+Patient Record 1 — Cardiometabolic Case
+
+Patient ID: PT-CVD-47291
+Age: 58
+Sex: Male
+Ethnicity: South Asian
+
+Chief Complaint
+
+Progressive exertional dyspnea and intermittent retrosternal chest discomfort over the past 6 weeks, aggravated during moderate physical activity.
+
+Past Medical History
+
+Type 2 Diabetes Mellitus (diagnosed 12 years ago)
+
+Hypertension (diagnosed 15 years ago)
+
+Dyslipidemia
+
+Stage 2 Chronic Kidney Disease
+
+Obstructive Sleep Apnea
+
+Current Medications
+
+Metformin 1000 mg BID
+
+Empagliflozin 10 mg daily
+
+Atorvastatin 40 mg nightly
+
+Losartan 50 mg daily
+
+Aspirin 81 mg daily
+
+Metoprolol succinate 50 mg daily
+
+Vital Signs
+Parameter	Value
+Blood Pressure	148/92 mmHg
+Heart Rate	92 bpm
+Respiratory Rate	18 breaths/min
+Temperature	36.8°C
+BMI	29.6 kg/m²
+Laboratory Findings
+Test	Result	Reference
+HbA1c	8.4 %	< 5.7
+LDL Cholesterol	158 mg/dL	< 100
+HDL	37 mg/dL	> 40
+Triglycerides	245 mg/dL	< 150
+Serum Creatinine	1.5 mg/dL	0.6–1.2
+eGFR	56 mL/min/1.73m²	> 90
+hs-CRP	5.2 mg/L	< 1
+Diagnostic Imaging
+
+Coronary CT Angiography Findings
+
+70% stenosis in proximal Left Anterior Descending (LAD) artery
+
+Mild calcified plaque in Right Coronary Artery
+
+Coronary artery calcium score: 312 (Agatston units)
+
+Clinical Impression
+
+Likely stable ischemic heart disease with poorly controlled metabolic syndrome.
+
+Patient Record 2 — Neurological Case
+
+Patient ID: PT-NEU-88320
+Age: 41
+Sex: Female
+
+Chief Complaint
+
+Recurrent episodes of visual disturbances, unilateral headache, and transient paresthesia affecting the right upper limb.
+
+Symptom Timeline
+Event	Duration
+Visual aura	20 minutes
+Headache	4–8 hours
+Paresthesia	10–15 minutes
+Neurological Examination
+
+Cranial nerves: intact
+
+Motor strength: 5/5 in all extremities
+
+Sensory exam: normal
+
+Reflexes: symmetric
+
+MRI Brain Findings
+
+T2 FLAIR Imaging
+
+Multiple hyperintense lesions located in:
+
+Periventricular white matter
+
+Corpus callosum
+
+Juxtacortical region
+
+No evidence of acute infarction.
+
+CSF Analysis
+Parameter	Result
+Oligoclonal bands	Positive
+IgG Index	0.92 (elevated)
+WBC	6 cells/mm³
+Differential Diagnosis
+
+Multiple Sclerosis (Relapsing-Remitting)
+
+Complex Migraine
+
+CNS Vasculitis
+
+Patient Record 3 — Infectious Disease Case
+
+Patient ID: PT-INF-22109
+Age: 34
+Sex: Male
+
+Chief Complaint
+
+High-grade fever (39.5°C), myalgia, and persistent cough for 7 days.
+
+Exposure History
+
+Recent travel to Southeast Asia
+
+Exposure to crowded urban environments
+
+No known TB contacts
+
+Laboratory Tests
+Test	Result
+WBC	13,200 /µL
+Neutrophils	78%
+Lymphocytes	12%
+CRP	65 mg/L
+Procalcitonin	1.8 ng/mL
+Respiratory Panel PCR
+
+Detected pathogen:
+
+Influenza A (H3N2)
+
+Chest X-Ray
+
+Patchy bilateral infiltrates
+
+Mild lower lobe consolidation
+
+Treatment Plan
+
+Oseltamivir 75 mg BID
+
+Supportive care
+
+Oxygen therapy if SpO2 < 92%
+
+Patient Record 4 — Oncology Case
+
+Patient ID: PT-ONC-55172
+Age: 63
+Sex: Female
+
+Diagnosis
+
+Stage IIIA Non-Small Cell Lung Cancer (Adenocarcinoma subtype)
+
+Molecular Profile
+Biomarker	Result
+EGFR mutation	Negative
+ALK rearrangement	Negative
+KRAS mutation	G12C Positive
+PD-L1 Expression	35%
+Imaging
+
+PET-CT Findings
+
+Primary tumor: 3.8 cm mass in right upper lobe
+
+Mediastinal lymph node involvement
+
+No distant metastasis
+
+Treatment Strategy
+
+Concurrent chemoradiation
+
+Consider immune checkpoint inhibitor (Durvalumab) as consolidation therapy
