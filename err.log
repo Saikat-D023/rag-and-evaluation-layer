@@ -1,0 +1,24 @@
+
+> production-rag@ ingest C:\Users\saika\desktop\resume-wale-projects\production-RAG\rag-and-evaluation-layer
+> tsx scripts/ingest.ts
+
+[dotenv@17.3.1] injecting env (0) from ..\..\.env -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
+C:\Users\saika\desktop\resume-wale-projects\production-RAG\rag-and-evaluation-layer\node_modules\.pnpm\@supabase+supabase-js@2.99.1\node_modules\@supabase\supabase-js\src\lib\helpers.ts:86
+    throw new Error('supabaseUrl is required.')
+          ^
+
+
+Error: supabaseUrl is required.
+    at validateSupabaseUrl (C:\Users\saika\desktop\resume-wale-projects\production-RAG\rag-and-evaluation-layer\node_modules\.pnpm\@supabase+supabase-js@2.99.1\node_modules\@supabase\supabase-js\src\lib\helpers.ts:86:11)
+    at new SupabaseClient (C:\Users\saika\desktop\resume-wale-projects\production-RAG\rag-and-evaluation-layer\node_modules\.pnpm\@supabase+supabase-js@2.99.1\node_modules\@supabase\supabase-js\src\SupabaseClient.ts:284:21)
+    at createClient (C:\Users\saika\desktop\resume-wale-projects\production-RAG\rag-and-evaluation-layer\node_modules\.pnpm\@supabase+supabase-js@2.99.1\node_modules\@supabase\supabase-js\src\index.ts:60:10)
+    at <anonymous> (C:\Users\saika\desktop\resume-wale-projects\production-RAG\rag-and-evaluation-layer\packages\rag-core\index.ts:8:18)
+    at Object.<anonymous> (C:\Users\saika\desktop\resume-wale-projects\production-RAG\rag-and-evaluation-layer\packages\rag-core\index.ts:45:29)
+    at Module._compile (node:internal/modules/cjs/loader:1706:14)
+    at Object.transformer (C:\Users\saika\desktop\resume-wale-projects\production-RAG\rag-and-evaluation-layer\node_modules\.pnpm\tsx@4.21.0\node_modules\tsx\dist\register-D46fvsV_.cjs:3:1104)
+    at Module.load (node:internal/modules/cjs/loader:1441:32)
+    at Function._load (node:internal/modules/cjs/loader:1263:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+
+Node.js v22.19.0
+ ELIFECYCLE  Command failed with exit code 1.
