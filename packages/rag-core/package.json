@@ -4,15 +4,19 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "type-check": "tsc --noEmit",
+    "evaluate": "tsx ../../scripts/run-eval.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@repo/shared-types": "workspace:*",
+    "@supabase/supabase-js": "^2.99.1",
     "dotenv": "^17.3.1",
-    "openai": "^6.29.0"
+    "openai": "^6.29.0",
+    "wink-bm25-text-search": "^3.1.2"
   },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",

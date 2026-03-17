@@ -1,0 +1,62 @@
+[
+    {
+        "id": "q001",
+        "question": "What problem in traditional language models does Retrieval-Augmented Generation aim to solve?",
+        "ground_truth": "Traditional language models rely only on their training data and internal parameters, which can lead to outdated information and hallucinated facts. RAG solves this by retrieving relevant external documents to ground the model's answers.",
+        "context_expected": "sample1-doc-0"
+    },
+    {
+        "id": "q002",
+        "question": "What is the main idea behind Retrieval-Augmented Generation (RAG)?",
+        "ground_truth": "Retrieval-Augmented Generation is an architecture that improves the factual accuracy of language models by combining them with an external knowledge retrieval system.",
+        "context_expected": "sample1-doc-0"
+    },
+    {
+        "id": "q003",
+        "question": "What happens during the retrieval step in a RAG pipeline?",
+        "ground_truth": "During retrieval, the user query is converted into an embedding and used to search a vector database or document index to find the most relevant document passages.",
+        "context_expected": "sample1-doc-0"
+    },
+    {
+        "id": "q004",
+        "question": "Why are documents split into chunks during the RAG indexing stage?",
+        "ground_truth": "Documents are split into chunks so that smaller, more relevant sections can be embedded and retrieved efficiently during similarity search.",
+        "context_expected": "sample1-doc-0"
+    },
+    {
+        "id": "q005",
+        "question": "How does RAG reduce hallucinations in language model outputs?",
+        "ground_truth": "RAG reduces hallucinations by providing retrieved external documents as context so the language model generates answers grounded in real information instead of relying solely on its internal knowledge.",
+        "context_expected": "sample1-doc-0"
+    },
+    {
+        "id": "q006",
+        "question": "What are the main components of a typical RAG pipeline?",
+        "ground_truth": "A typical RAG pipeline includes an ingestion pipeline that processes documents and stores embeddings in a vector database, a retriever that finds relevant chunks at query time, and a generator language model that produces the final answer.",
+        "context_expected": "sample1-doc-0"
+    },
+    {
+        "id": "q007",
+        "question": "Why are vector databases used in RAG systems?",
+        "ground_truth": "Vector databases store embeddings of document chunks and enable similarity search to retrieve passages that are semantically relevant to a user's query.",
+        "context_expected": "sample1-doc-0"
+    },
+    {
+        "id": "q008",
+        "question": "Why is RAG particularly useful for company knowledge bases or private data?",
+        "ground_truth": "RAG allows AI systems to retrieve and use information from proprietary documents or internal knowledge bases without requiring the language model to be retrained.",
+        "context_expected": "sample1-doc-0"
+    },
+    {
+        "id": "q009",
+        "question": "What engineering factors influence retrieval performance in a RAG system?",
+        "ground_truth": "Retrieval performance depends on factors such as chunking strategy, embedding model selection, and the similarity search algorithms used by the retriever.",
+        "context_expected": "sample1-doc-0"
+    },
+    {
+        "id": "q010",
+        "question": "What techniques are used in modern RAG systems to improve retrieval quality?",
+        "ground_truth": "Modern RAG systems often use reranking models, hybrid search that combines keyword and vector search, and evaluation layers to detect hallucinations and improve answer reliability.",
+        "context_expected": "sample1-doc-0"
+    }
+]
