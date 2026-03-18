@@ -79,6 +79,9 @@ importers:
       next:
         specifier: 16.1.5
         version: 16.1.5(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+      openai:
+        specifier: ^6.29.0
+        version: 6.29.0(ws@8.19.0)
       react:
         specifier: ^19.2.0
         version: 19.2.0

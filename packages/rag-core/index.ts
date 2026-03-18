@@ -121,25 +121,29 @@ export const generateAnswer = async (query: string) => {
 };
 
 export const retrieveHybrid = async (query: string, limit = 3) => {
-    // 1. Get Semantic results (Dense Retrieval)
+    // 1. Get results from Supabase
     const vectorResults = await retrieveRelevantChunks(query, 10);
 
-    // FIX: If we have very few results, BM25 consolidation will fail.
-    // Just return what we have.
     if (vectorResults.length < 3) {
         return vectorResults.slice(0, limit);
     }
 
-    // 2. Initialize Wink BM25
+    // 2. Initialize the engine
     const engine = bm25();
     engine.defineConfig({ fldWeights: { content: 1 } });
 
-    const docs = vectorResults.map((res: any, i: number) => ({
-        id: i,
-        content: res.content
-    }));
+    // 3. IMPORTANT: Define prep tasks (wink-bm25 REQUIRES this to process text)
+    engine.definePrepTasks([
+        (text: string) => text.toLowerCase().split(/\s+/).filter(Boolean)
+    ]);
 
-    docs.forEach((doc: any) => engine.addDoc(doc));
+    // 4. Add documents with an EXPLICIT unique ID as the second argument
+    vectorResults.forEach((res: any, i: number) => {
+        const doc = { content: res.content || "" };
+        // The second argument 'i' is the key here!
+        console.log(`so the res.content is ${res.content}`)
+        engine.addDoc(doc, i);
+    });
 
     try {
         engine.consolidate();
@@ -147,13 +151,13 @@ export const retrieveHybrid = async (query: string, limit = 3) => {
 
         return results
             .map((item: any) => {
+                // item[0] is the 'i' we passed above
                 const originalDoc = vectorResults[item[0] as number];
                 return { ...originalDoc, bm25Score: item[1] };
             })
             .slice(0, limit);
     } catch (e) {
-        // Fallback to vector results if BM25 still complains
-        console.warn("BM25 consolidation skipped:", e.message);
+        console.error("Hybrid Search Fallback:", e);
         return vectorResults.slice(0, limit);
     }
 };

@@ -4,7 +4,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 
 function loadEnv() {
-    let currentDir = __dirname;
+    let currentDir = process.cwd();
     // Go up up to 5 levels to find the .env file
     for (let i = 0; i < 5; i++) {
         const envPath = path.join(currentDir, '.env');
