@@ -1,12 +1,20 @@
 import { OpenAI } from "openai";
 import { retrieveHybrid } from "@repo/rag-core";
 import { NextResponse } from "next/server";
+import { createClient } from "@/utils/supabase/server";
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 });
 
 export async function POST(req: Request) {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+        return new Response("Unauthorized", { status: 401 });
+    }
+
     try {
         const { messages } = await req.json();
         const lastMessage = messages[messages.length - 1].content;
