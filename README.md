@@ -1,159 +1,223 @@
-# Turborepo starter
+# Production-Grade RAG System
 
-This Turborepo starter is maintained by the Turborepo core team.
+A scalable **Retrieval-Augmented Generation (RAG)** system built as a Turborepo monorepo. It ingests documents, stores semantic embeddings in Supabase, retrieves relevant context via hybrid search, and generates grounded LLM answers — complete with automated faithfulness evaluation and a streaming web API.
 
-## Using this example
+---
 
-Run the following command:
+## Features
 
-```sh
-npx create-turbo@latest
+- **Document Ingestion** — Chunk large documents and store them with vector embeddings in Supabase (PostgreSQL + pgvector)
+- **Hybrid Search** — Combines dense semantic search (pgvector cosine similarity) with sparse keyword matching (TF-IDF BM25) for best-of-both retrieval
+- **LLM-Powered Answers** — Uses GPT-4o-mini to generate context-grounded responses from retrieved chunks
+- **Streaming Web API** — Streams answers in real-time via Next.js App Router, with citation metadata prepended
+- **Automated Evaluation** — LLM-as-a-Judge pipeline scores answer faithfulness (0–1) against a golden Q&A dataset and persists metrics to Supabase
+- **Monorepo Architecture** — Clean separation of core logic, scripts, and web app via Turborepo
+
+---
+
+## 🗂️ Project Structure
+
+```
+.
+├── packages/
+│   └── rag-core/
+│       ├── index.ts        # Core RAG engine (chunking, embeddings, retrieval, generation)
+│       └── supabase.ts     # Supabase client initialization
+├── scripts/
+│   ├── ingest.ts           # Document ingestion pipeline
+│   ├── test-query.ts       # Semantic search debug script
+│   ├── chat.ts             # Interactive terminal chatbot
+│   └── run-eval.ts         # Automated faithfulness evaluator
+├── apps/
+│   └── web/
+│       └── app/api/
+│           ├── chat/route.ts    # Streaming chat API endpoint
+│           └── ingest/route.ts  # Web-triggered ingestion endpoint
+└── data/
+    ├── raw/                # Source documents for ingestion
+    └── golden-dataset/     # Q&A pairs for evaluation (qa-pairs.json)
 ```
 
-## What's inside?
+---
 
-This Turborepo includes the following packages/apps:
+## Core Engine (`packages/rag-core/index.ts`)
 
-### Apps and Packages
+The heart of the system — all RAG business logic lives here as reusable, exported functions.
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+| Function | Description |
+|---|---|
+| `chunkText` | Splits raw text into smaller chunks (default: 500 chars) |
+| `processTextIntoChunks` | Wraps `chunkText` and attaches source metadata |
+| `generateEmbeddings` | Calls OpenAI `text-embedding-3-small` to produce vector embeddings |
+| `syncChunksWithEmbeddings` | Orchestrates chunking + embedding + Supabase upsert |
+| `retrieveRelevantChunks` | Pure vector search via Supabase RPC (`match_documents`) |
+| `retrieveHybrid` | Semantic search + BM25 re-ranking for best retrieval quality |
+| `generateAnswer` | End-to-end: retrieves top 2 chunks, prompts GPT-4o-mini for a grounded answer |
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+---
 
-### Utilities
+## Getting Started
 
-This Turborepo has some additional tools already setup for you:
+### Prerequisites
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+- Node.js 18+
+- A [Supabase](https://supabase.com) project with `pgvector` enabled
+- An OpenAI API key
 
-### Build
+### Environment Variables
 
-To build all apps and packages, run the following command:
+Create a `.env` file at the repo root (or within the relevant package):
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo build
+```env
+OPENAI_API_KEY=your_openai_key
+SUPABASE_URL=your_supabase_url
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
 ```
 
-Without global `turbo`, use your package manager:
+### Install Dependencies
 
-```sh
-cd my-turborepo
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
+```bash
+npm install
 ```
 
-You can build a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
+### Supabase Setup
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
+Your Supabase database needs two tables and one RPC function:
 
-```sh
-turbo build --filter=docs
+1. A `documents` table to store chunks and embeddings
+2. An `evaluation_runs` table for storing eval metrics
+3. A `match_documents` RPC function for vector similarity search (uses `pgvector`)
+
+> Refer to your Supabase migration files for the exact schema.
+
+---
+
+## Ingesting Documents
+
+Place raw `.txt` files in `data/raw/`, then run:
+
+```bash
+npx ts-node scripts/ingest.ts
 ```
 
-Without global `turbo`:
+This chunks the text, generates OpenAI embeddings for each chunk, and upserts everything to Supabase.
 
-```sh
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
+---
+
+## Testing Retrieval
+
+To verify your vector search is returning relevant results without invoking the LLM:
+
+```bash
+npx ts-node scripts/test-query.ts
 ```
 
-### Develop
+Prints raw retrieved chunks and their cosine similarity scores for a test query.
 
-To develop all apps and packages, run the following command:
+---
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
+## Terminal Chatbot
 
-```sh
-cd my-turborepo
-turbo dev
+Run a full end-to-end RAG chatbot in your terminal:
+
+```bash
+npx ts-node scripts/chat.ts
 ```
 
-Without global `turbo`, use your package manager:
+Type any question and receive a hybrid-search-grounded answer from GPT-4o-mini. Type `exit` to quit.
 
-```sh
-cd my-turborepo
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
+---
+
+## Running Evaluations
+
+Measure your system's faithfulness against a golden dataset:
+
+```bash
+npx ts-node scripts/run-eval.ts
 ```
 
-You can develop a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
+For each Q&A pair in `data/golden-dataset/qa-pairs.json`, this script:
+1. Runs the full retrieval + generation pipeline
+2. Measures latency
+3. Uses a second LLM call to score faithfulness (0 = hallucination, 1 = fully grounded)
+4. Saves aggregated metrics to the `evaluation_runs` table in Supabase
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
+### Golden Dataset Format
 
-```sh
-turbo dev --filter=web
+```json
+[
+  {
+    "question": "What is retrieval-augmented generation?",
+    "expected_answer": "RAG is a technique that..."
+  }
+]
 ```
 
-Without global `turbo`:
+---
 
-```sh
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
+## Web API
+
+Start the Next.js web app:
+
+```bash
+cd apps/web
+npm run dev
 ```
 
-### Remote Caching
+### `POST /api/chat`
 
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
+Streams a RAG-generated answer to the client in real-time.
 
-Turborepo can use a technique known as [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo login
+**Request body:**
+```json
+{
+  "messages": [
+    { "role": "user", "content": "What is RAG?" }
+  ]
+}
 ```
 
-Without global `turbo`, use your package manager:
+**Response:** A `ReadableStream` with citation metadata (source files, chunk IDs) prepended, followed by the streamed answer text.
 
-```sh
-cd my-turborepo
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
+### `POST /api/ingest`
+
+Ingest new knowledge directly from the web UI.
+
+**Request body:**
+```json
+{
+  "text": "Your raw document content here...",
+  "filename": "my-document.txt"
+}
 ```
 
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
+---
 
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
+## Tech Stack
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
+| Layer | Technology |
+|---|---|
+| Monorepo | [Turborepo](https://turbo.build) |
+| Web Framework | [Next.js](https://nextjs.org) (App Router) |
+| Database | [Supabase](https://supabase.com) (PostgreSQL + pgvector) |
+| Embeddings | OpenAI `text-embedding-3-small` |
+| LLM | OpenAI `gpt-4o-mini` |
+| Keyword Search | `wink-bm25-text-search` (TF-IDF BM25) |
+| Language | TypeScript |
 
-```sh
-turbo link
-```
+---
 
-Without global `turbo`:
+## How Hybrid Search Works
 
-```sh
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
-```
+1. The user's query is embedded into a vector using OpenAI
+2. `pgvector` performs cosine similarity search to retrieve the top 10 semantically relevant chunks
+3. Those 10 chunks are re-ranked using BM25 keyword scoring against the original query terms
+4. The top 2 chunks are passed as context to the LLM
 
-## Useful Links
+This approach combines the strengths of **semantic understanding** (vector search) and **exact keyword matching** (BM25), significantly improving retrieval precision over either method alone.
 
-Learn more about the power of Turborepo:
+---
 
-- [Tasks](https://turborepo.dev/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.dev/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.dev/docs/reference/configuration)
-- [CLI Usage](https://turborepo.dev/docs/reference/command-line-reference)
+## 📄s License
+
+MIT
