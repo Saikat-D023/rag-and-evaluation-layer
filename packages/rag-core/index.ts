@@ -1,6 +1,5 @@
+/// <reference path="./wink-bm25-text-search.d.ts" />
 import { ProjectStatus, Chunk } from "@repo/shared-types";
-import * as dotenv from "dotenv";
-import * as path from "path";
 import { OpenAI } from "openai";
 import bm25 from 'wink-bm25-text-search';
 
@@ -9,8 +8,6 @@ import { supabase } from './supabase';
 
 // 2. Re-export everything from supabase so it's accessible externally
 export * from './supabase';
-
-dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,

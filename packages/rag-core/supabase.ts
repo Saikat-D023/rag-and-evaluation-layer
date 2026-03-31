@@ -5,12 +5,15 @@ import * as fs from 'fs';
 
 function loadEnv() {
     let currentDir = process.cwd();
-    // Go up up to 5 levels to find the .env file
+    const candidateNames = ['.env.local', '.env'];
+    // Walk upward to find either a local app env file or the repo root env file.
     for (let i = 0; i < 5; i++) {
-        const envPath = path.join(currentDir, '.env');
-        if (fs.existsSync(envPath)) {
-            dotenv.config({ path: envPath });
-            return;
+        for (const candidateName of candidateNames) {
+            const envPath = path.join(currentDir, candidateName);
+            if (fs.existsSync(envPath)) {
+                dotenv.config({ path: envPath });
+                return;
+            }
         }
         currentDir = path.join(currentDir, '..');
     }
@@ -18,16 +21,19 @@ function loadEnv() {
 
 loadEnv();
 
-const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseUrl =
+    process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!supabaseUrl || !supabaseKey) {
     console.error("DEBUG: Current Environment Variables:", {
-        URL: !!process.env.SUPABASE_URL,
+        URL: !!(process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL),
         KEY: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
         CWD: process.cwd()
     });
-    throw new Error("Missing Supabase Environment Variables in .env");
+    throw new Error(
+        "Missing Supabase environment variables. Expected SUPABASE_SERVICE_ROLE_KEY and either SUPABASE_URL or NEXT_PUBLIC_SUPABASE_URL."
+    );
 }
 
 export const supabase = createClient(supabaseUrl, supabaseKey);

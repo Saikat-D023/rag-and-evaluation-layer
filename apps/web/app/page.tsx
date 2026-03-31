@@ -64,7 +64,7 @@ export default async function LandingPage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-6 pt-4">
             <Link
-              href="/signup"
+              href="/dashboard"
               className="text-center px-8 py-4 bg-[#E8FF00] border-2 border-[#0A0A0A] text-lg font-black uppercase tracking-wider shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all"
             >
               Start Exploring

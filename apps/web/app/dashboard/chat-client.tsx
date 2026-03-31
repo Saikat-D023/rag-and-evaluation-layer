@@ -9,14 +9,22 @@ type Message = {
   id: string;
   role: "user" | "assistant";
   content: string;
-  sources?: { filename: string; chunkId: string }[];
   isStreaming?: boolean;
 };
+
+const STREAMING_STAGES = [
+  "Thinking...",
+  "Generating report...",
+  "Finalizing response...",
+];
 
 export default function ChatClient({ userEmail }: { userEmail: string }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [loadingLabel, setLoadingLabel] = useState(STREAMING_STAGES[0]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const supabase = createClient();
@@ -27,9 +35,80 @@ export default function ChatClient({ userEmail }: { userEmail: string }) {
     }
   }, [messages, isStreaming]);
 
+  useEffect(() => {
+    if (!isStreaming) {
+      setLoadingLabel(STREAMING_STAGES[0]);
+      return;
+    }
+
+    setLoadingLabel(STREAMING_STAGES[0]);
+
+    const thinkingTimer = window.setTimeout(() => {
+      setLoadingLabel(STREAMING_STAGES[1]);
+    }, 5000);
+
+    const finalizingTimer = window.setTimeout(() => {
+      setLoadingLabel(STREAMING_STAGES[2]);
+    }, 10000);
+
+    return () => {
+      window.clearTimeout(thinkingTimer);
+      window.clearTimeout(finalizingTimer);
+    };
+  }, [isStreaming]);
+
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     router.push("/login");
+  };
+
+  const parseResponsePayload = async (res: Response) => {
+    const contentType = res.headers.get("content-type") || "";
+    if (contentType.includes("application/json")) {
+      return res.json();
+    }
+
+    const text = await res.text();
+    return { error: text || `Request failed with status ${res.status}` };
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const res = await fetch("/api/ingest", {
+        method: "POST",
+        body: formData,
+      });
+
+      const payload = await parseResponsePayload(res);
+
+      if (res.ok) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: crypto.randomUUID(),
+            role: "assistant",
+            content: `Document added successfully: ${file.name}`,
+          },
+        ]);
+      } else {
+        throw new Error(payload.error || payload.message || "Failed to upload document");
+      }
+    } catch (err: any) {
+      console.error(err);
+      alert(`Error uploading document: ${err.message}`);
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
   };
 
   const handleSubmit = async (e?: React.FormEvent) => {
@@ -83,23 +162,11 @@ export default function ChatClient({ userEmail }: { userEmail: string }) {
         if (!isMetadataParsed && buffer.startsWith("metadata:")) {
           const splitPoint = buffer.indexOf("\n\n");
           if (splitPoint !== -1) {
-            const metadataStr = buffer.slice("metadata:".length, splitPoint);
-            let parsedSources = [];
-            try {
-              const citations = JSON.parse(metadataStr);
-              parsedSources = citations.map((c: any) => ({
-                filename: c.source || "Unknown",
-                chunkId: c.id,
-              }));
-            } catch (err) {
-              console.error("Failed to parse metadata", err);
-            }
-
             const remainingText = buffer.slice(splitPoint + 2);
             setMessages((prev) =>
               prev.map((m) =>
                 m.id === assistantMsgId
-                  ? { ...m, sources: parsedSources, content: m.content + remainingText }
+                  ? { ...m, content: m.content + remainingText }
                   : m
               )
             );
@@ -142,10 +209,6 @@ export default function ChatClient({ userEmail }: { userEmail: string }) {
       );
     }
   };
-
-  const latestSource = messages
-    .filter((m) => m.role === "assistant" && m.sources && m.sources.length > 0)
-    .pop()?.sources?.[0]?.filename;
 
   return (
     <div className="flex h-screen w-full font-sans text-black overflow-hidden">
@@ -203,16 +266,20 @@ export default function ChatClient({ userEmail }: { userEmail: string }) {
       {/* MAIN PANEL */}
       <div className="flex-1 flex flex-col h-full bg-[#F5F0E8] overflow-hidden">
         {/* Top bar */}
-        <div className="h-[60px] border-b-2 border-black flex items-center px-6 justify-between shrink-0 bg-white">
-          <h2 className="font-black uppercase text-lg tracking-wide">
-            AI Assistant
-          </h2>
-          {latestSource && (
-            <div className="hidden sm:flex border-2 border-black bg-[#E8FF00] px-3 py-1 font-bold text-xs uppercase items-center gap-2 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
-              <span className="w-2 h-2 rounded-full bg-black animate-pulse" />
-              Retrieving from: {latestSource}
+        <div className="h-[80px] border-b-2 border-black flex items-center px-6 justify-between shrink-0 bg-white">
+          <div className="flex items-center gap-4">
+            <div className="bg-[#E8FF00] border-2 border-black p-2 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"></rect><circle cx="12" cy="5" r="2"></circle><path d="M12 7v4"></path><line x1="8" y1="16" x2="8.01" y2="16"></line><line x1="16" y1="16" x2="16.01" y2="16"></line></svg>
             </div>
-          )}
+            <div>
+              <h2 className="font-black uppercase text-2xl italic tracking-tight">
+                AI ASSISTANT
+              </h2>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+             <button className="border-2 border-black p-2 hover:bg-[#E8FF00] transition-colors"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="4" y1="12" x2="20" y2="12"></line><line x1="4" y1="6" x2="20" y2="6"></line><line x1="4" y1="18" x2="20" y2="18"></line></svg></button>
+          </div>
         </div>
 
         {/* Chat thread */}
@@ -244,48 +311,13 @@ export default function ChatClient({ userEmail }: { userEmail: string }) {
                 ) : (
                   <div className="w-full max-w-full">
                     <div className="bg-white text-black border-2 border-black px-5 py-4 font-medium shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] whitespace-pre-wrap leading-relaxed">
-                      {msg.content}
+                      {msg.content || (msg.isStreaming ? loadingLabel : "")}
                       {msg.isStreaming && (
                         <span className="inline-block animate-pulse ml-1 font-black">
                           |
                         </span>
                       )}
                     </div>
-                    {/* Source Document Card */}
-                    {msg.sources && msg.sources.length > 0 && !msg.isStreaming && (
-                      <div className="mt-4 flex flex-wrap gap-2">
-                        {msg.sources.map((src, i) => (
-                          <div
-                            key={i}
-                            className="flex items-center gap-2 bg-white border-2 border-black px-3 py-2 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-all cursor-pointer"
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="16"
-                              height="16"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            >
-                              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                              <polyline points="14 2 14 8 20 8" />
-                              <line x1="16" y1="13" x2="8" y2="13" />
-                              <line x1="16" y1="17" x2="8" y2="17" />
-                              <polyline points="10 9 9 9 8 9" />
-                            </svg>
-                            <span className="text-xs font-bold uppercase truncate max-w-[150px]">
-                              {src.filename}
-                            </span>
-                            <span className="text-[10px] bg-[#E8FF00] px-1 border border-black font-bold">
-                              {src.chunkId}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
                   </div>
                 )}
               </div>
@@ -299,10 +331,19 @@ export default function ChatClient({ userEmail }: { userEmail: string }) {
             onSubmit={handleSubmit}
             className="flex items-center gap-3 w-full max-w-4xl mx-auto"
           >
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileUpload}
+              accept=".pdf,.doc,.docx"
+              className="hidden"
+            />
             <button
               type="button"
-              className="shrink-0 p-3 bg-[#F5F0E8] border-2 border-black hover:bg-[#E8FF00] transition-colors"
-              title="Attach Document"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isUploading || isStreaming}
+              className={`shrink-0 p-3 border-2 border-black transition-colors ${isUploading ? "bg-gray-300 animate-pulse" : "bg-[#F5F0E8] hover:bg-[#E8FF00]"}`}
+              title="Add document"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -322,9 +363,9 @@ export default function ChatClient({ userEmail }: { userEmail: string }) {
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              disabled={isStreaming}
+              disabled={isStreaming || isUploading}
               className="flex-1 bg-white border-2 border-black p-3 focus:outline-none focus:ring-4 focus:ring-[#E8FF00] font-medium disabled:opacity-50 transition-all rounded-none"
-              placeholder="Ask about your technical documents..."
+              placeholder={isUploading ? "Uploading document..." : isStreaming ? "Assistant is working..." : "Ask your question..."}
             />
             <button
               type="submit"

@@ -1,7 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   try {
     let supabaseResponse = NextResponse.next({
       request: {
@@ -38,6 +38,8 @@ export async function middleware(request: NextRequest) {
 
     const pathname = request.nextUrl.pathname
 
+    // TEMPORARILY DISABLED AUTHENTICATION FOR DEVELOPMENT
+    /*
     if (pathname.startsWith('/dashboard') && !user) {
       const url = request.nextUrl.clone()
       url.pathname = '/login'
@@ -60,12 +62,11 @@ export async function middleware(request: NextRequest) {
       })
       return redirectResponse
     }
+    */
 
     return supabaseResponse
   } catch (err) {
-    console.error("Middleware Auth Error:", err)
-    // If anything fails (like missing env vars), just pass through
-    // so we don't crash the entire Next.js app with "not able to find middleware component"
+    console.error("Proxy Auth Error:", err)
     return NextResponse.next({
       request: {
         headers: request.headers,

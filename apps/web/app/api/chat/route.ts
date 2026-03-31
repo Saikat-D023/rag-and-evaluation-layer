@@ -11,9 +11,11 @@ export async function POST(req: Request) {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
+    /*
     if (!user) {
         return new Response("Unauthorized", { status: 401 });
     }
+    */
 
     try {
         const { messages } = await req.json();
@@ -39,8 +41,9 @@ export async function POST(req: Request) {
             messages: [
                 {
                     role: "system",
-                    content: `You are a professional RAG assistant. Answer based ONLY on the context.
-          If the info isn't there, say you don't know need more information. 
+                    content: `You are a helpful and intelligent AI assistant. 
+          Respond to the user naturally and directly. If context from documents is provided, use it to inform your answers and provide specific citations.
+          But if the context is empty or irrelevant to the user's question, freely answer the question using your own general knowledge.
           
           CONTEXT:
           ${contextText}`

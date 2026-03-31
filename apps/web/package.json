@@ -15,8 +15,11 @@
     "@repo/shared-types": "workspace:*",
     "@repo/ui": "workspace:*",
     "@supabase/ssr": "^0.9.0",
+    "@types/pdf-parse": "^1.1.5",
+    "mammoth": "^1.12.0",
     "next": "16.1.5",
     "openai": "^6.29.0",
+    "pdf-parse": "^2.4.5",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },
