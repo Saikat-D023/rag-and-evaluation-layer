@@ -1,13 +1,7 @@
 import { processTextIntoChunks, syncChunksWithEmbeddings } from "@repo/rag-core";
 import { NextResponse } from "next/server";
-import { createRequire } from "node:module";
-import { pathToFileURL } from "node:url";
 import mammoth from "mammoth";
 import { PDFParse } from "pdf-parse";
-
-const require = createRequire(import.meta.url);
-const pdfWorkerPath = require.resolve("pdfjs-dist/legacy/build/pdf.worker.mjs");
-PDFParse.setWorker(pathToFileURL(pdfWorkerPath).href);
 
 export async function POST(req: Request) {
     try {
@@ -21,7 +15,7 @@ export async function POST(req: Request) {
         const fileName = file.name;
 
         if (fileName.toLowerCase().endsWith(".pdf")) {
-            const parser = new PDFParse({ data: buffer });
+            const parser = new PDFParse({ data: new Uint8Array(buffer) });
             try {
                 const data = await parser.getText();
                 text = data.text;
@@ -32,12 +26,12 @@ export async function POST(req: Request) {
             const result = await mammoth.extractRawText({ buffer });
             text = result.value;
         } else {
-             text = await file.text();
+            text = await file.text();
         }
 
         if (!text.trim()) return NextResponse.json({ error: "Could not extract text from file" }, { status: 400 });
 
-        // Step 1: Chunking 
+        // Step 1: Chunking
         const chunks = processTextIntoChunks(text, fileName);
 
         // Step 2: Embedding & Sync (Uses OpenAI SDK inside rag-core)

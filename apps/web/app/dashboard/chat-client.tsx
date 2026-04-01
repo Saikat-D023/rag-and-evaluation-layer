@@ -12,6 +12,17 @@ type Message = {
   isStreaming?: boolean;
 };
 
+type Session = {
+  id: string;
+  title: string;
+  updatedAt: string;
+};
+
+type DocumentStat = {
+  source: string;
+  chunkCount: number;
+};
+
 const STREAMING_STAGES = [
   "Thinking...",
   "Generating report...",
@@ -24,10 +35,70 @@ export default function ChatClient({ userEmail }: { userEmail: string }) {
   const [isStreaming, setIsStreaming] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [loadingLabel, setLoadingLabel] = useState(STREAMING_STAGES[0]);
+  
+  // Sidebar State
+  const [activeSection, setActiveSection] = useState<"history" | "documents" | "settings" | null>(null);
+  const [sessions, setSessions] = useState<Session[]>([]);
+  const [documents, setDocuments] = useState<DocumentStat[]>([]);
+  const [storage, setStorage] = useState({ percentage: 0, totalChunks: 0, maxChunks: 10000 });
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const supabase = createClient();
+
+  useEffect(() => {
+    fetchStorage();
+  }, []);
+
+  const fetchStorage = async () => {
+    try {
+      const res = await fetch("/api/storage");
+      if (res.ok) setStorage(await res.json());
+    } catch (e) { console.error("Storage fetch failed", e); }
+  };
+
+  const fetchSessions = async () => {
+    try {
+      const res = await fetch("/api/sessions");
+      if (res.ok) setSessions(await res.json());
+    } catch (e) { console.error("Sessions fetch failed", e); }
+  };
+
+  const fetchDocuments = async () => {
+    try {
+      const res = await fetch("/api/documents");
+      if (res.ok) setDocuments(await res.json());
+    } catch (e) { console.error("Documents fetch failed", e); }
+  };
+
+  const loadSession = async (sessionId: string) => {
+    try {
+      const res = await fetch(`/api/sessions/${sessionId}/messages`);
+      if (res.ok) {
+        const msgs = await res.json();
+        setMessages(msgs);
+        setCurrentSessionId(sessionId);
+      }
+    } catch(e) { console.error("Failed to load session messages", e); }
+  };
+
+  const toggleSection = (section: "history" | "documents" | "settings") => {
+    if (activeSection === section) {
+      setActiveSection(null);
+    } else {
+      setActiveSection(section);
+      if (section === "history") fetchSessions();
+      if (section === "documents") fetchDocuments();
+    }
+  };
+
+  const startNewSession = () => {
+    setCurrentSessionId(null);
+    setMessages([]);
+    setActiveSection(null);
+  };
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -67,7 +138,6 @@ export default function ChatClient({ userEmail }: { userEmail: string }) {
     if (contentType.includes("application/json")) {
       return res.json();
     }
-
     const text = await res.text();
     return { error: text || `Request failed with status ${res.status}` };
   };
@@ -97,6 +167,8 @@ export default function ChatClient({ userEmail }: { userEmail: string }) {
             content: `Document added successfully: ${file.name}`,
           },
         ]);
+        fetchStorage(); // Refresh storage indicator
+        if(activeSection === "documents") fetchDocuments(); // Refresh if open
       } else {
         throw new Error(payload.error || payload.message || "Failed to upload document");
       }
@@ -141,6 +213,7 @@ export default function ChatClient({ userEmail }: { userEmail: string }) {
             role: m.role,
             content: m.content,
           })),
+          sessionId: currentSessionId,
         }),
       });
 
@@ -162,6 +235,14 @@ export default function ChatClient({ userEmail }: { userEmail: string }) {
         if (!isMetadataParsed && buffer.startsWith("metadata:")) {
           const splitPoint = buffer.indexOf("\n\n");
           if (splitPoint !== -1) {
+            const metadataStr = buffer.slice(9, splitPoint); // Extract json
+            try {
+              const parsedMeta = JSON.parse(metadataStr);
+              if (parsedMeta.sessionId && !currentSessionId) {
+                 setCurrentSessionId(parsedMeta.sessionId);
+              }
+            } catch(e) {}
+
             const remainingText = buffer.slice(splitPoint + 2);
             setMessages((prev) =>
               prev.map((m) =>
@@ -213,47 +294,92 @@ export default function ChatClient({ userEmail }: { userEmail: string }) {
   return (
     <div className="flex h-screen w-full font-sans text-black overflow-hidden">
       {/* LEFT SIDEBAR */}
-      <div className="w-[220px] shrink-0 border-r-2 border-black flex flex-col bg-white">
+      <div className="w-[260px] shrink-0 border-r-2 border-black flex flex-col bg-white overflow-y-auto">
         <div className="bg-[#E8FF00] border-b-2 border-black p-4 font-black uppercase text-xl leading-none">
           RAG EXPLORER
         </div>
-        <div className="p-4 border-b-2 border-black">
-          <Link
-            href="/dashboard/documents"
-            className="flex items-center justify-center gap-2 w-full bg-[#E8FF00] border-2 border-black p-3 font-bold text-sm uppercase hover:bg-black hover:text-[#E8FF00] transition-colors"
-          >
-            <span>NEW KB</span>
-            <span className="text-lg leading-none">+</span>
-          </Link>
-        </div>
+        
         <nav className="flex-1 flex flex-col uppercase font-bold text-sm">
-          <button className="text-left border-b-2 border-black p-4 hover:bg-[#F5F0E8] transition-colors">
-            History
+          <button 
+            onClick={startNewSession}
+            className="text-left border-b-2 border-black p-4 bg-black text-[#E8FF00] hover:bg-gray-900 transition-colors flex items-center justify-between"
+          >
+            <span>New Chat</span>
+            <span className="text-xl leading-none">+</span>
           </button>
-          <Link
-            href="/dashboard/documents"
-            className="text-left border-b-2 border-black p-4 hover:bg-[#F5F0E8] transition-colors"
+          
+          {/* HISTORY SECTION */}
+          <button 
+            onClick={() => toggleSection("history")}
+            className={`text-left border-b-2 border-black p-4 transition-colors flex justify-between items-center ${activeSection === "history" ? "bg-[#F5F0E8]" : "hover:bg-gray-50"}`}
+          >
+            History
+            <span className="text-xs">{activeSection === "history" ? "▼" : "▶"}</span>
+          </button>
+          {activeSection === "history" && (
+            <div className="bg-[#F5F0E8] border-b-2 border-black p-2 flex flex-col max-h-[250px] overflow-y-auto">
+              {sessions.length === 0 ? (
+                 <div className="p-2 text-xs opacity-50 text-center normal-case">No past sessions</div>
+              ) : sessions.map(s => (
+                <button 
+                  key={s.id}
+                  onClick={() => loadSession(s.id)} 
+                  className={`text-left p-2 text-xs normal-case truncate border-2 border-transparent hover:border-black ${currentSessionId === s.id ? "bg-[#E8FF00] font-black border-black" : "font-medium"}`}
+                >
+                  {s.title}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* DOCUMENTS SECTION */}
+          <button 
+             onClick={() => toggleSection("documents")}
+            className={`text-left border-b-2 border-black p-4 transition-colors flex justify-between items-center ${activeSection === "documents" ? "bg-[#F5F0E8]" : "hover:bg-gray-50"}`}
           >
             Documents
-          </Link>
-          <div className="bg-black text-white p-4 border-b-2 border-black cursor-default">
-            Active Session
-          </div>
-          <button className="text-left border-b-2 border-black p-4 hover:bg-[#F5F0E8] transition-colors">
+            <span className="text-xs">{activeSection === "documents" ? "▼" : "▶"}</span>
+          </button>
+          {activeSection === "documents" && (
+            <div className="bg-[#F5F0E8] border-b-2 border-black p-2 flex flex-col max-h-[250px] overflow-y-auto gap-1">
+              {documents.length === 0 ? (
+                 <div className="p-2 text-xs opacity-50 text-center normal-case">No documents indexed</div>
+              ) : documents.map((doc, idx) => (
+                <div key={idx} className="flex flex-col p-2 bg-white border-2 border-black text-xs normal-case shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
+                   <div className="font-bold truncate">{doc.source}</div>
+                   <div className="text-[10px] opacity-70 mt-1">{doc.chunkCount} internal chunks</div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* SETTINGS SECTION */}
+          <button 
+             onClick={() => toggleSection("settings")}
+            className={`text-left border-b-2 border-black p-4 transition-colors flex justify-between items-center ${activeSection === "settings" ? "bg-[#F5F0E8]" : "hover:bg-gray-50"}`}
+          >
             Settings
+            <span className="text-xs">{activeSection === "settings" ? "▼" : "▶"}</span>
           </button>
+          {activeSection === "settings" && (
+            <div className="bg-[#F5F0E8] border-b-2 border-black p-4 flex flex-col text-xs normal-case gap-2">
+               <div><span className="font-bold uppercase text-[10px] opacity-70">LLM Engine</span><br/>GPT-4o-mini</div>
+               <div><span className="font-bold uppercase text-[10px] opacity-70">Embeddings</span><br/>text-embedding-3-small</div>
+               <div><span className="font-bold uppercase text-[10px] opacity-70">Chunk Size</span><br/>500 characters</div>
+               <div><span className="font-bold uppercase text-[10px] opacity-70">Search Strategy</span><br/>Hybrid (BM25 + Vector)</div>
+               <div><span className="font-bold uppercase text-[10px] opacity-70">Threshold</span><br/>0.3 (Vector Match)</div>
+            </div>
+          )}
         </nav>
-        <div className="p-4 border-t-2 border-black bg-[#F5F0E8] flex flex-col gap-3">
-          <div className="text-xs font-bold uppercase flex justify-between">
-            <span>Storage</span>
-            <span>45%</span>
+
+        <div className="p-4 border-t-2 border-black bg-white flex flex-col gap-3">
+          <div className="text-[10px] font-bold uppercase flex justify-between items-end">
+            <span>Storage ({storage.totalChunks}/{storage.maxChunks})</span>
+            <span>{storage.percentage}%</span>
           </div>
-          <div className="h-2 w-full border-2 border-black bg-white">
-            <div className="h-full bg-black w-[45%]" />
+          <div className="h-2 w-full border-2 border-black bg-[#F5F0E8]">
+            <div className="h-full bg-[#E8FF00]" style={{ width: `${storage.percentage}%` }} />
           </div>
-          <button className="w-full bg-white border-2 border-black p-2 text-xs font-bold uppercase hover:bg-[#E8FF00] transition-colors">
-            Upgrade Plan
-          </button>
           <button
             onClick={handleSignOut}
             className="w-full bg-black text-white border-2 border-black p-2 text-xs font-bold uppercase hover:text-red-400 transition-colors mt-2"
@@ -276,9 +402,6 @@ export default function ChatClient({ userEmail }: { userEmail: string }) {
                 AI ASSISTANT
               </h2>
             </div>
-          </div>
-          <div className="flex items-center gap-3">
-             <button className="border-2 border-black p-2 hover:bg-[#E8FF00] transition-colors"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="4" y1="12" x2="20" y2="12"></line><line x1="4" y1="6" x2="20" y2="6"></line><line x1="4" y1="18" x2="20" y2="18"></line></svg></button>
           </div>
         </div>
 

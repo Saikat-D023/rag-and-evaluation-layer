@@ -2,6 +2,8 @@ import { OpenAI } from "openai";
 import { retrieveHybrid } from "@repo/rag-core";
 import { NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
+import { db } from "@/db";
+import { chatSessions, chatMessages } from "@/db/schema";
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
@@ -11,20 +13,34 @@ export async function POST(req: Request) {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
-    /*
-    if (!user) {
-        return new Response("Unauthorized", { status: 401 });
-    }
-    */
-
     try {
-        const { messages } = await req.json();
+        const { messages, sessionId: providedSessionId } = await req.json();
         const lastMessage = messages[messages.length - 1].content;
+        
+        // 1. Handle Session
+        let sessionId = providedSessionId;
+        if (!sessionId) {
+             const [newSession] = await db
+                .insert(chatSessions)
+                .values({ 
+                    title: lastMessage.slice(0, 50) + (lastMessage.length > 50 ? "..." : "") || 'New Chat' 
+                })
+                .returning();
+             if (!newSession) throw new Error("Failed to create chat session");
+             sessionId = newSession.id;
+        }
 
-        // 1. Get the facts using your Hybrid logic
+        // 2. Save User Message
+        await db.insert(chatMessages).values({
+            sessionId,
+            role: "user",
+            content: lastMessage,
+        });
+
+        // 3. Get the facts using your Hybrid logic
         const contextResults = await retrieveHybrid(lastMessage, 3);
 
-        // 2. Format context and extract citation metadata
+        // 4. Format context and extract citation metadata
         const contextText = contextResults
             .map((c: any) => `[ID: ${c.id}] Content: ${c.content}`)
             .join("\n\n");
@@ -35,7 +51,7 @@ export async function POST(req: Request) {
             chunkIndex: c.metadata?.chunkIndex
         }));
 
-        // 3. Create a Stream
+        // 5. Create a Stream
         const stream = await openai.chat.completions.create({
             model: "gpt-4o-mini",
             messages: [
@@ -53,17 +69,34 @@ export async function POST(req: Request) {
             stream: true,
         });
 
-        // 4. Return as a ReadableStream (This is what the frontend expects)
+        // 6. Return as a ReadableStream and save Assistant message when done
         const encoder = new TextEncoder();
         const customStream = new ReadableStream({
             async start(controller) {
-                // Send citations first so the UI knows the sources immediately
-                controller.enqueue(encoder.encode(`metadata:${JSON.stringify(citations)}\n\n`));
+                // Send citations and sessionId first so the UI knows
+                const metadataStr = JSON.stringify({ citations, sessionId });
+                controller.enqueue(encoder.encode(`metadata:${metadataStr}\n\n`));
+
+                let fullAssistantMessage = "";
 
                 for await (const chunk of stream) {
                     const content = chunk.choices[0]?.delta?.content || "";
+                    fullAssistantMessage += content;
                     controller.enqueue(encoder.encode(content));
                 }
+
+                // Save Assistant Message
+                try {
+                    await db.insert(chatMessages).values({
+                        sessionId,
+                        role: "assistant",
+                        content: fullAssistantMessage,
+                        metadata: { citations },
+                    });
+                } catch(e) {
+                    console.error("Failed to save assistant message", e);
+                }
+
                 controller.close();
             },
         });
