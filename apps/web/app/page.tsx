@@ -8,26 +8,26 @@ export default async function LandingPage() {
   } = await supabase.auth.getUser();
 
   return (
-    <div className="min-h-screen bg-[#F5F0E8] text-[#0A0A0A] font-sans selection:bg-[#E8FF00] selection:text-[#0A0A0A] overflow-x-hidden">
+    <div className="min-h-screen bg-[#F2F4EC] text-[#0A0A0A] font-sans selection:bg-[#7AB547] selection:text-[#0A0A0A] overflow-x-hidden">
       {/* SECTION 1 — NAVBAR */}
       <nav className="fixed top-0 w-full bg-white border-b-2 border-[#0A0A0A] z-50 h-16 flex items-center justify-between px-6">
         <div className="flex items-center gap-2">
-          <div className="w-4 h-4 bg-[#E8FF00] border-2 border-[#0A0A0A]"></div>
+          <div className="w-4 h-4 bg-[#7AB547] border-2 border-[#0A0A0A]"></div>
           <span className="font-black text-xl uppercase tracking-widest">
             RAG EXPLORER
           </span>
         </div>
         <div className="hidden md:flex items-center gap-8 font-bold text-sm uppercase tracking-wider">
-          <Link href="#product" className="hover:underline hover:bg-[#E8FF00] px-1 transition-all">Product</Link>
-          <Link href="#features" className="hover:underline hover:bg-[#E8FF00] px-1 transition-all">Features</Link>
-          <Link href="#pricing" className="hover:underline hover:bg-[#E8FF00] px-1 transition-all">Pricing</Link>
-          <Link href="#docs" className="hover:underline hover:bg-[#E8FF00] px-1 transition-all">Docs</Link>
+          <Link href="#product" className="hover:underline hover:bg-[#7AB547] px-1 transition-all">Product</Link>
+          <Link href="#features" className="hover:underline hover:bg-[#7AB547] px-1 transition-all">Features</Link>
+          <Link href="#pricing" className="hover:underline hover:bg-[#7AB547] px-1 transition-all">Pricing</Link>
+          <Link href="#docs" className="hover:underline hover:bg-[#7AB547] px-1 transition-all">Docs</Link>
         </div>
         <div className="flex items-center gap-4 text-sm font-bold uppercase tracking-wider">
           {user ? (
             <Link
               href="/dashboard"
-              className="px-5 py-2 bg-[#0A0A0A] text-[#E8FF00] border-2 border-[#0A0A0A] hover:bg-gray-800 hover:text-white transition-all shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]"
+              className="px-5 py-2 bg-[#0A0A0A] text-[#7AB547] border-2 border-[#0A0A0A] hover:bg-gray-800 hover:text-white transition-all shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]"
             >
               Go to Dashboard
             </Link>
@@ -35,13 +35,13 @@ export default async function LandingPage() {
             <>
               <Link
                 href="/login"
-                className="hidden sm:block px-5 py-2 bg-transparent border-2 border-[#0A0A0A] hover:bg-[#E8FF00] transition-all shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]"
+                className="hidden sm:block px-5 py-2 bg-transparent border-2 border-[#0A0A0A] hover:bg-[#7AB547] transition-all shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]"
               >
                 Sign In
               </Link>
               <Link
                 href="/signup"
-                className="px-5 py-2 bg-[#E8FF00] border-2 border-[#0A0A0A] hover:bg-white transition-all shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]"
+                className="px-5 py-2 bg-[#7AB547] border-2 border-[#0A0A0A] hover:bg-white transition-all shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]"
               >
                 Get Started
               </Link>
@@ -53,11 +53,11 @@ export default async function LandingPage() {
       {/* SECTION 2 — HERO */}
       <section className="pt-32 pb-20 px-6 max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
         <div className="flex-1 space-y-8">
-          <div className="inline-block bg-[#E8FF00] border-2 border-[#0A0A0A] px-3 py-1 text-xs font-black uppercase tracking-widest shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+          <div className="inline-block bg-[#7AB547] border-2 border-[#0A0A0A] px-3 py-1 text-xs font-black uppercase tracking-widest shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
             V2.0 NOW LIVE
           </div>
           <h1 className="text-5xl md:text-7xl lg:text-[5rem] font-black uppercase leading-[1.05] tracking-tight">
-            Talk to your <span className="bg-[#E8FF00] inline-block px-2 border-2 border-[#0A0A0A] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] -rotate-2 transform">DATA</span> like never before.
+            Talk to your <span className="bg-[#7AB547] inline-block px-2 border-2 border-[#0A0A0A] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] -rotate-2 transform">DATA</span> like never before.
           </h1>
           <p className="text-lg md:text-xl font-medium max-w-xl leading-relaxed">
             The ultimate tool for Retrieval-Augmented Generation. Connect your documents and query them with AI-powered precision in seconds.
@@ -65,7 +65,7 @@ export default async function LandingPage() {
           <div className="flex flex-col sm:flex-row gap-6 pt-4">
             <Link
               href="/dashboard"
-              className="text-center px-8 py-4 bg-[#E8FF00] border-2 border-[#0A0A0A] text-lg font-black uppercase tracking-wider shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all"
+              className="text-center px-8 py-4 bg-[#7AB547] border-2 border-[#0A0A0A] text-lg font-black uppercase tracking-wider shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all"
             >
               Start Exploring
             </Link>
@@ -86,16 +86,45 @@ export default async function LandingPage() {
             {/* Abstract visual elements */}
             <div className="absolute w-3/4 h-3/4 bg-white clip-polygon-hexagon border-2 border-[#0A0A0A] opacity-90 animate-pulse mix-blend-overlay"></div>
             <div className="absolute w-1/2 h-1/2 bg-[#0A0A0A] rounded-full blur-[2px] animate-bounce mix-blend-multiply"></div>
-            <div className="absolute w-full h-full bg-[linear-gradient(45deg,transparent_45%,#E8FF00_50%,transparent_55%)] opacity-30"></div>
+            <div className="absolute w-full h-full bg-[linear-gradient(45deg,transparent_45%,#7AB547_50%,transparent_55%)] opacity-30"></div>
             
             {/* Sticker */}
-            <div className="absolute bottom-6 right-6 bg-[#E8FF00] border-2 border-[#0A0A0A] px-4 py-2 font-black uppercase tracking-widest text-sm shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] -rotate-6 transform hover:rotate-12 transition-transform">
+            <div className="absolute bottom-6 right-6 bg-[#7AB547] border-2 border-[#0A0A0A] px-4 py-2 font-black uppercase tracking-widest text-sm shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] -rotate-6 transform hover:rotate-12 transition-transform">
               NO CODE NEEDED
             </div>
             {/* Hexagon clip-path definition inline */}
             <style dangerouslySetInnerHTML={{__html: `
               .clip-polygon-hexagon { clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%); }
             `}} />
+          </div>
+        </div>
+      </section>
+
+      {/* SECTION 2.5 — DEMO VIDEO */}
+      <section id="demo" className="px-6 max-w-6xl mx-auto -mt-8 mb-24 relative z-20">
+        <div className="w-full aspect-video bg-[#0A0A0A] border-[3px] sm:border-4 border-[#0A0A0A] shadow-[8px_8px_0px_0px_rgba(122,181,71,1)] sm:shadow-[16px_16px_0px_0px_rgba(122,181,71,1)] flex flex-col overflow-hidden group cursor-pointer hover:-translate-y-2 transition-transform duration-500">
+          {/* Fake Browser Header */}
+          <div className="h-10 sm:h-12 bg-white border-b-[3px] sm:border-b-4 border-[#0A0A0A] flex items-center px-4 gap-2 shrink-0">
+            <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-[#E07A5F] border-2 border-[#0A0A0A]"></div>
+            <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-[#fcd34d] border-2 border-[#0A0A0A]"></div>
+            <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-[#7AB547] border-2 border-[#0A0A0A]"></div>
+            <div className="ml-4 sm:mx-auto bg-[#F2F4EC] border-2 border-[#0A0A0A] px-4 py-0.5 text-[10px] sm:text-xs font-black tracking-widest uppercase hidden sm:block">
+              RAG_EXPLORER_DEMO.MP4
+            </div>
+          </div>
+          {/* Video Placeholder Area */}
+          <div className="flex-1 bg-[#F2F4EC] flex flex-col items-center justify-center relative bg-[radial-gradient(#0A0A0A_2px,transparent_2px)] [background-size:24px_24px] opacity-90">
+            {/* Play Button */}
+            <div className="w-20 h-20 sm:w-28 sm:h-28 bg-[#7AB547] rounded-full border-4 border-[#0A0A0A] flex items-center justify-center shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] sm:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] group-hover:scale-110 group-hover:bg-[#B88A60] transition-all duration-300">
+              <svg className="w-8 h-8 sm:w-12 sm:h-12 ml-2" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 9-14 9V3z" stroke="black" strokeWidth="2" strokeLinejoin="round"/></svg>
+            </div>
+            
+            {/* Helper Text */}
+            <div className="absolute inset-x-0 bottom-4 sm:bottom-8 text-center bg-white border-y-4 border-[#0A0A0A] py-3 mx-4 sm:mx-12 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+               <p className="text-xs sm:text-base font-black uppercase tracking-widest text-[#0A0A0A]">
+                  Insert your manual screenshare / video here
+               </p>
+            </div>
           </div>
         </div>
       </section>
@@ -118,7 +147,7 @@ export default async function LandingPage() {
       {/* SECTION 4 — FEATURES */}
       <section id="features" className="py-24 px-6 max-w-7xl mx-auto">
         <div className="mb-16">
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-black uppercase inline-block border-b-8 border-[#E8FF00] pb-2 tracking-tight">
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-black uppercase inline-block border-b-8 border-[#7AB547] pb-2 tracking-tight">
             Engineered for Scale
           </h2>
           <p className="mt-6 text-xl font-bold uppercase tracking-widest opacity-80">
@@ -160,7 +189,7 @@ export default async function LandingPage() {
             },
           ].map((feature, i) => (
             <div key={i} className="bg-white border-2 border-[#0A0A0A] p-8 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-2 transition-transform duration-300">
-              <div className="w-12 h-12 bg-[#E8FF00] border-2 border-[#0A0A0A] flex items-center justify-center text-xl mb-6 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+              <div className="w-12 h-12 bg-[#7AB547] border-2 border-[#0A0A0A] flex items-center justify-center text-xl mb-6 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
                 {feature.icon}
               </div>
               <h3 className="text-xl font-black uppercase mb-4 tracking-wider">
@@ -183,7 +212,7 @@ export default async function LandingPage() {
           
           <div className="flex flex-col md:flex-row items-center justify-between gap-12 md:gap-4 relative max-w-5xl mx-auto">
             <div className="flex-1 flex flex-col items-center text-center z-10 w-full">
-              <div className="w-20 h-20 rounded-full bg-[#E8FF00] border-2 border-[#0A0A0A] flex items-center justify-center text-4xl font-black mb-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:scale-110 transition-transform">
+              <div className="w-20 h-20 rounded-full bg-[#7AB547] border-2 border-[#0A0A0A] flex items-center justify-center text-4xl font-black mb-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:scale-110 transition-transform">
                 1
               </div>
               <h3 className="text-3xl font-black uppercase mb-4 tracking-wider">UPLOAD</h3>
@@ -193,7 +222,7 @@ export default async function LandingPage() {
             <div className="hidden md:block text-5xl font-black mt-[-100px] z-0 opacity-40">→</div>
             
             <div className="flex-1 flex flex-col items-center text-center z-10 w-full">
-              <div className="w-20 h-20 rounded-full bg-[#E8FF00] border-2 border-[#0A0A0A] flex items-center justify-center text-4xl font-black mb-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:scale-110 transition-transform">
+              <div className="w-20 h-20 rounded-full bg-[#7AB547] border-2 border-[#0A0A0A] flex items-center justify-center text-4xl font-black mb-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:scale-110 transition-transform">
                 2
               </div>
               <h3 className="text-3xl font-black uppercase mb-4 tracking-wider">INDEX</h3>
@@ -203,7 +232,7 @@ export default async function LandingPage() {
             <div className="hidden md:block text-5xl font-black mt-[-100px] z-0 opacity-40">→</div>
             
             <div className="flex-1 flex flex-col items-center text-center z-10 w-full">
-              <div className="w-20 h-20 rounded-full bg-[#E8FF00] border-2 border-[#0A0A0A] flex items-center justify-center text-4xl font-black mb-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:scale-110 transition-transform">
+              <div className="w-20 h-20 rounded-full bg-[#7AB547] border-2 border-[#0A0A0A] flex items-center justify-center text-4xl font-black mb-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:scale-110 transition-transform">
                 3
               </div>
               <h3 className="text-3xl font-black uppercase mb-4 tracking-wider">ASK</h3>
@@ -231,25 +260,25 @@ export default async function LandingPage() {
             <div className="text-5xl font-black mb-8 border-b-2 border-black pb-8">$0<span className="text-xl opacity-60">/month</span></div>
             <ul className="space-y-4 mb-10 flex-1 font-bold">
               <li className="flex items-center gap-3">
-                <span className="font-black text-[#E8FF00] text-xl" style={{WebkitTextStroke: "1px black"}}>✓</span>
+                <span className="font-black text-[#7AB547] text-xl" style={{WebkitTextStroke: "1px black"}}>✓</span>
                 5 Documents
               </li>
               <li className="flex items-center gap-3">
-                <span className="font-black text-[#E8FF00] text-xl" style={{WebkitTextStroke: "1px black"}}>✓</span>
+                <span className="font-black text-[#7AB547] text-xl" style={{WebkitTextStroke: "1px black"}}>✓</span>
                 100 Queries/month
               </li>
               <li className="flex items-center gap-3">
-                <span className="font-black text-[#E8FF00] text-xl" style={{WebkitTextStroke: "1px black"}}>✓</span>
+                <span className="font-black text-[#7AB547] text-xl" style={{WebkitTextStroke: "1px black"}}>✓</span>
                 Community Support
               </li>
             </ul>
-            <Link href="/signup" className="block text-center w-full py-4 bg-white border-2 border-[#0A0A0A] font-black uppercase tracking-wider hover:bg-[#E8FF00] transition-colors shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+            <Link href="/signup" className="block text-center w-full py-4 bg-white border-2 border-[#0A0A0A] font-black uppercase tracking-wider hover:bg-[#7AB547] transition-colors shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
               Get Started
             </Link>
           </div>
 
           {/* PRO */}
-          <div className="flex-[1.15] bg-[#E8FF00] border-2 border-[#0A0A0A] p-10 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex flex-col relative z-10 lg:-mt-4 hover:-translate-y-1 transition-transform">
+          <div className="flex-[1.15] bg-[#7AB547] border-2 border-[#0A0A0A] p-10 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex flex-col relative z-10 lg:-mt-4 hover:-translate-y-1 transition-transform">
             <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-white border-2 border-[#0A0A0A] px-6 py-2 font-black uppercase text-sm tracking-widest shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
               POPULAR
             </div>
@@ -277,7 +306,7 @@ export default async function LandingPage() {
                 Eval Pipeline Access
               </li>
             </ul>
-            <Link href="/signup" className="block text-center w-full py-5 bg-[#0A0A0A] text-[#E8FF00] border-2 border-[#0A0A0A] font-black uppercase tracking-widest hover:bg-white hover:text-[#0A0A0A] transition-colors shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] text-lg">
+            <Link href="/signup" className="block text-center w-full py-5 bg-[#0A0A0A] text-[#7AB547] border-2 border-[#0A0A0A] font-black uppercase tracking-widest hover:bg-white hover:text-[#0A0A0A] transition-colors shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] text-lg">
               Go Pro
             </Link>
           </div>
@@ -288,19 +317,19 @@ export default async function LandingPage() {
             <div className="text-5xl font-black mb-8 border-b-2 border-black pb-8">$99<span className="text-xl opacity-60">/month</span></div>
             <ul className="space-y-4 mb-10 flex-1 font-bold">
               <li className="flex items-center gap-3">
-                <span className="font-black text-[#E8FF00] text-xl" style={{WebkitTextStroke: "1px black"}}>✓</span>
+                <span className="font-black text-[#7AB547] text-xl" style={{WebkitTextStroke: "1px black"}}>✓</span>
                 Custom LLMs
               </li>
               <li className="flex items-center gap-3">
-                <span className="font-black text-[#E8FF00] text-xl" style={{WebkitTextStroke: "1px black"}}>✓</span>
+                <span className="font-black text-[#7AB547] text-xl" style={{WebkitTextStroke: "1px black"}}>✓</span>
                 SLA Guarantee
               </li>
               <li className="flex items-center gap-3">
-                <span className="font-black text-[#E8FF00] text-xl" style={{WebkitTextStroke: "1px black"}}>✓</span>
+                <span className="font-black text-[#7AB547] text-xl" style={{WebkitTextStroke: "1px black"}}>✓</span>
                 Dedicated Manager
               </li>
               <li className="flex items-center gap-3">
-                <span className="font-black text-[#E8FF00] text-xl" style={{WebkitTextStroke: "1px black"}}>✓</span>
+                <span className="font-black text-[#7AB547] text-xl" style={{WebkitTextStroke: "1px black"}}>✓</span>
                 On-premise option
               </li>
             </ul>
@@ -312,7 +341,7 @@ export default async function LandingPage() {
       </section>
 
       {/* SECTION 7 — CTA BANNER */}
-      <section className="w-full bg-[#E8FF00] border-y-2 border-[#0A0A0A] py-24 px-6 relative overflow-hidden">
+      <section className="w-full bg-[#7AB547] border-y-2 border-[#0A0A0A] py-24 px-6 relative overflow-hidden">
         <div className="max-w-4xl mx-auto text-center relative z-10">
           <h2 className="text-5xl md:text-7xl font-black uppercase mb-8 leading-tight tracking-tight">
             Ready to talk to your data?
@@ -331,7 +360,7 @@ export default async function LandingPage() {
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8 text-center md:text-left">
           <div className="space-y-4">
             <div className="flex items-center justify-center md:justify-start gap-3">
-              <div className="w-5 h-5 bg-[#E8FF00]"></div>
+              <div className="w-5 h-5 bg-[#7AB547]"></div>
               <span className="font-black text-2xl uppercase tracking-widest">
                 RAG EXPLORER
               </span>
@@ -342,20 +371,20 @@ export default async function LandingPage() {
           </div>
           
           <div className="flex flex-wrap justify-center gap-6 font-bold uppercase text-sm tracking-wider">
-            <Link href="#product" className="hover:text-[#E8FF00] transition-colors">Product</Link>
-            <Link href="#features" className="hover:text-[#E8FF00] transition-colors">Features</Link>
-            <Link href="#pricing" className="hover:text-[#E8FF00] transition-colors">Pricing</Link>
-            <Link href="#docs" className="hover:text-[#E8FF00] transition-colors">Docs</Link>
+            <Link href="#product" className="hover:text-[#7AB547] transition-colors">Product</Link>
+            <Link href="#features" className="hover:text-[#7AB547] transition-colors">Features</Link>
+            <Link href="#pricing" className="hover:text-[#7AB547] transition-colors">Pricing</Link>
+            <Link href="#docs" className="hover:text-[#7AB547] transition-colors">Docs</Link>
           </div>
           
           <div className="flex flex-wrap justify-center gap-4 text-xs font-bold uppercase opacity-60 tracking-wider">
-            <Link href="#" className="hover:text-[#E8FF00] transition-colors">Twitter</Link>
+            <Link href="#" className="hover:text-[#7AB547] transition-colors">Twitter</Link>
             <span className="opacity-30">|</span>
-            <Link href="#" className="hover:text-[#E8FF00] transition-colors">GitHub</Link>
+            <Link href="#" className="hover:text-[#7AB547] transition-colors">GitHub</Link>
             <span className="opacity-30">|</span>
-            <Link href="#" className="hover:text-[#E8FF00] transition-colors">Privacy</Link>
+            <Link href="#" className="hover:text-[#7AB547] transition-colors">Privacy</Link>
             <span className="opacity-30">|</span>
-            <Link href="#" className="hover:text-[#E8FF00] transition-colors">Terms</Link>
+            <Link href="#" className="hover:text-[#7AB547] transition-colors">Terms</Link>
           </div>
         </div>
       </footer>

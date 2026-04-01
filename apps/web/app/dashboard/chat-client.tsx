@@ -295,14 +295,14 @@ export default function ChatClient({ userEmail }: { userEmail: string }) {
     <div className="flex h-screen w-full font-sans text-black overflow-hidden">
       {/* LEFT SIDEBAR */}
       <div className="w-[260px] shrink-0 border-r-2 border-black flex flex-col bg-white overflow-y-auto">
-        <div className="bg-[#E8FF00] border-b-2 border-black p-4 font-black uppercase text-xl leading-none">
+        <div className="bg-[#7AB547] border-b-2 border-black p-4 font-black uppercase text-xl leading-none">
           RAG EXPLORER
         </div>
         
         <nav className="flex-1 flex flex-col uppercase font-bold text-sm">
           <button 
             onClick={startNewSession}
-            className="text-left border-b-2 border-black p-4 bg-black text-[#E8FF00] hover:bg-gray-900 transition-colors flex items-center justify-between"
+            className="text-left border-b-2 border-black p-4 bg-[#B88A60] text-black hover:bg-gray-900 transition-colors flex items-center justify-between"
           >
             <span>New Chat</span>
             <span className="text-xl leading-none">+</span>
@@ -311,20 +311,20 @@ export default function ChatClient({ userEmail }: { userEmail: string }) {
           {/* HISTORY SECTION */}
           <button 
             onClick={() => toggleSection("history")}
-            className={`text-left border-b-2 border-black p-4 transition-colors flex justify-between items-center ${activeSection === "history" ? "bg-[#F5F0E8]" : "hover:bg-gray-50"}`}
+            className={`text-left border-b-2 border-black p-4 transition-colors flex justify-between items-center ${activeSection === "history" ? "bg-[#F2F4EC]" : "hover:bg-gray-50"}`}
           >
             History
             <span className="text-xs">{activeSection === "history" ? "▼" : "▶"}</span>
           </button>
           {activeSection === "history" && (
-            <div className="bg-[#F5F0E8] border-b-2 border-black p-2 flex flex-col max-h-[250px] overflow-y-auto">
+            <div className="bg-[#F2F4EC] border-b-2 border-black p-2 flex flex-col max-h-[250px] overflow-y-auto">
               {sessions.length === 0 ? (
                  <div className="p-2 text-xs opacity-50 text-center normal-case">No past sessions</div>
               ) : sessions.map(s => (
                 <button 
                   key={s.id}
                   onClick={() => loadSession(s.id)} 
-                  className={`text-left p-2 text-xs normal-case truncate border-2 border-transparent hover:border-black ${currentSessionId === s.id ? "bg-[#E8FF00] font-black border-black" : "font-medium"}`}
+                  className={`text-left p-2 text-xs normal-case truncate border-2 border-transparent hover:border-black ${currentSessionId === s.id ? "bg-[#7AB547] font-black border-black" : "font-medium"}`}
                 >
                   {s.title}
                 </button>
@@ -335,13 +335,13 @@ export default function ChatClient({ userEmail }: { userEmail: string }) {
           {/* DOCUMENTS SECTION */}
           <button 
              onClick={() => toggleSection("documents")}
-            className={`text-left border-b-2 border-black p-4 transition-colors flex justify-between items-center ${activeSection === "documents" ? "bg-[#F5F0E8]" : "hover:bg-gray-50"}`}
+            className={`text-left border-b-2 border-black p-4 transition-colors flex justify-between items-center ${activeSection === "documents" ? "bg-[#F2F4EC]" : "hover:bg-gray-50"}`}
           >
             Documents
             <span className="text-xs">{activeSection === "documents" ? "▼" : "▶"}</span>
           </button>
           {activeSection === "documents" && (
-            <div className="bg-[#F5F0E8] border-b-2 border-black p-2 flex flex-col max-h-[250px] overflow-y-auto gap-1">
+            <div className="bg-[#F2F4EC] border-b-2 border-black p-2 flex flex-col max-h-[250px] overflow-y-auto gap-1">
               {documents.length === 0 ? (
                  <div className="p-2 text-xs opacity-50 text-center normal-case">No documents indexed</div>
               ) : documents.map((doc, idx) => (
@@ -356,13 +356,13 @@ export default function ChatClient({ userEmail }: { userEmail: string }) {
           {/* SETTINGS SECTION */}
           <button 
              onClick={() => toggleSection("settings")}
-            className={`text-left border-b-2 border-black p-4 transition-colors flex justify-between items-center ${activeSection === "settings" ? "bg-[#F5F0E8]" : "hover:bg-gray-50"}`}
+            className={`text-left border-b-2 border-black p-4 transition-colors flex justify-between items-center ${activeSection === "settings" ? "bg-[#F2F4EC]" : "hover:bg-gray-50"}`}
           >
             Settings
             <span className="text-xs">{activeSection === "settings" ? "▼" : "▶"}</span>
           </button>
           {activeSection === "settings" && (
-            <div className="bg-[#F5F0E8] border-b-2 border-black p-4 flex flex-col text-xs normal-case gap-2">
+            <div className="bg-[#F2F4EC] border-b-2 border-black p-4 flex flex-col text-xs normal-case gap-2">
                <div><span className="font-bold uppercase text-[10px] opacity-70">LLM Engine</span><br/>GPT-4o-mini</div>
                <div><span className="font-bold uppercase text-[10px] opacity-70">Embeddings</span><br/>text-embedding-3-small</div>
                <div><span className="font-bold uppercase text-[10px] opacity-70">Chunk Size</span><br/>500 characters</div>
@@ -377,8 +377,8 @@ export default function ChatClient({ userEmail }: { userEmail: string }) {
             <span>Storage ({storage.totalChunks}/{storage.maxChunks})</span>
             <span>{storage.percentage}%</span>
           </div>
-          <div className="h-2 w-full border-2 border-black bg-[#F5F0E8]">
-            <div className="h-full bg-[#E8FF00]" style={{ width: `${storage.percentage}%` }} />
+          <div className="h-2 w-full border-2 border-black bg-[#F2F4EC]">
+            <div className="h-full bg-[#7AB547]" style={{ width: `${storage.percentage}%` }} />
           </div>
           <button
             onClick={handleSignOut}
@@ -390,11 +390,11 @@ export default function ChatClient({ userEmail }: { userEmail: string }) {
       </div>
 
       {/* MAIN PANEL */}
-      <div className="flex-1 flex flex-col h-full bg-[#F5F0E8] overflow-hidden">
+      <div className="flex-1 flex flex-col h-full bg-[#F2F4EC] overflow-hidden">
         {/* Top bar */}
         <div className="h-[80px] border-b-2 border-black flex items-center px-6 justify-between shrink-0 bg-white">
           <div className="flex items-center gap-4">
-            <div className="bg-[#E8FF00] border-2 border-black p-2 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+            <div className="bg-[#7AB547] border-2 border-black p-2 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"></rect><circle cx="12" cy="5" r="2"></circle><path d="M12 7v4"></path><line x1="8" y1="16" x2="8.01" y2="16"></line><line x1="16" y1="16" x2="16.01" y2="16"></line></svg>
             </div>
             <div>
@@ -428,7 +428,7 @@ export default function ChatClient({ userEmail }: { userEmail: string }) {
                   {msg.role === "user" ? "You" : "Assistant"}
                 </div>
                 {msg.role === "user" ? (
-                  <div className="bg-[#E8FF00] text-black border-2 border-black px-5 py-4 font-bold shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                  <div className="bg-[#7AB547] text-black border-2 border-black px-5 py-4 font-bold shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
                     {msg.content}
                   </div>
                 ) : (
@@ -465,7 +465,7 @@ export default function ChatClient({ userEmail }: { userEmail: string }) {
               type="button"
               onClick={() => fileInputRef.current?.click()}
               disabled={isUploading || isStreaming}
-              className={`shrink-0 p-3 border-2 border-black transition-colors ${isUploading ? "bg-gray-300 animate-pulse" : "bg-[#F5F0E8] hover:bg-[#E8FF00]"}`}
+              className={`shrink-0 p-3 border-2 border-black transition-colors ${isUploading ? "bg-gray-300 animate-pulse" : "bg-[#F2F4EC] hover:bg-[#7AB547]"}`}
               title="Add document"
             >
               <svg
@@ -487,13 +487,13 @@ export default function ChatClient({ userEmail }: { userEmail: string }) {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               disabled={isStreaming || isUploading}
-              className="flex-1 bg-white border-2 border-black p-3 focus:outline-none focus:ring-4 focus:ring-[#E8FF00] font-medium disabled:opacity-50 transition-all rounded-none"
+              className="flex-1 bg-white border-2 border-black p-3 focus:outline-none focus:ring-4 focus:ring-[#7AB547] font-medium disabled:opacity-50 transition-all rounded-none"
               placeholder={isUploading ? "Uploading document..." : isStreaming ? "Assistant is working..." : "Ask your question..."}
             />
             <button
               type="submit"
               disabled={isStreaming || !input.trim()}
-              className="shrink-0 bg-[#E8FF00] border-2 border-black p-3 hover:bg-black hover:text-[#E8FF00] disabled:opacity-50 transition-colors focus:outline-none focus:ring-4 focus:ring-black"
+              className="shrink-0 bg-[#7AB547] border-2 border-black p-3 hover:bg-[#B88A60] hover:text-black disabled:opacity-50 transition-colors focus:outline-none focus:ring-4 focus:ring-black"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
