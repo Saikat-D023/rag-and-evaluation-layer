@@ -21,7 +21,7 @@ A scalable **Retrieval-Augmented Generation (RAG)** system built as a Turborepo 
 ![Demo GIF](apps/web/public/demo.gif)
 
 ### Video Walkthrough
-https://github.com/user/repo/blob/main/apps/web/public/demo2.mp4
+![Another Demo GIF](apps/web/public/demo2.gif)
 
 ---
 
