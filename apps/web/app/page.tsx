@@ -80,20 +80,21 @@ export default async function LandingPage() {
             No credit card required. Free plan available.
           </p>
         </div>
-        
+
         <div className="flex-1 w-full max-w-lg relative perspective-1000">
           <div className="relative w-full aspect-square bg-[#1a2e1a] border-2 border-[#0A0A0A] shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex items-center justify-center overflow-hidden">
             {/* Abstract visual elements */}
             <div className="absolute w-3/4 h-3/4 bg-white clip-polygon-hexagon border-2 border-[#0A0A0A] opacity-90 animate-pulse mix-blend-overlay"></div>
             <div className="absolute w-1/2 h-1/2 bg-[#0A0A0A] rounded-full blur-[2px] animate-bounce mix-blend-multiply"></div>
             <div className="absolute w-full h-full bg-[linear-gradient(45deg,transparent_45%,#7AB547_50%,transparent_55%)] opacity-30"></div>
-            
+
             {/* Sticker */}
             <div className="absolute bottom-6 right-6 bg-[#7AB547] border-2 border-[#0A0A0A] px-4 py-2 font-black uppercase tracking-widest text-sm shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] -rotate-6 transform hover:rotate-12 transition-transform">
               NO CODE NEEDED
             </div>
             {/* Hexagon clip-path definition inline */}
-            <style dangerouslySetInnerHTML={{__html: `
+            <style dangerouslySetInnerHTML={{
+              __html: `
               .clip-polygon-hexagon { clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%); }
             `}} />
           </div>
@@ -109,21 +110,24 @@ export default async function LandingPage() {
             <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-[#fcd34d] border-2 border-[#0A0A0A]"></div>
             <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-[#7AB547] border-2 border-[#0A0A0A]"></div>
             <div className="ml-4 sm:mx-auto bg-[#F2F4EC] border-2 border-[#0A0A0A] px-4 py-0.5 text-[10px] sm:text-xs font-black tracking-widest uppercase hidden sm:block">
-              RAG_EXPLORER_DEMO.MP4
+              RAG_EXPLORER_DEMO.GIF
             </div>
           </div>
-          {/* Video Placeholder Area */}
-          <div className="flex-1 bg-[#F2F4EC] flex flex-col items-center justify-center relative bg-[radial-gradient(#0A0A0A_2px,transparent_2px)] [background-size:24px_24px] opacity-90">
-            {/* Play Button */}
-            <div className="w-20 h-20 sm:w-28 sm:h-28 bg-[#7AB547] rounded-full border-4 border-[#0A0A0A] flex items-center justify-center shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] sm:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] group-hover:scale-110 group-hover:bg-[#B88A60] transition-all duration-300">
-              <svg className="w-8 h-8 sm:w-12 sm:h-12 ml-2" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 9-14 9V3z" stroke="black" strokeWidth="2" strokeLinejoin="round"/></svg>
-            </div>
-            
-            {/* Helper Text */}
-            <div className="absolute inset-x-0 bottom-4 sm:bottom-8 text-center bg-white border-y-4 border-[#0A0A0A] py-3 mx-4 sm:mx-12 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-               <p className="text-xs sm:text-base font-black uppercase tracking-widest text-[#0A0A0A]">
-                  Insert your manual screenshare / video here
-               </p>
+          {/* Demo GIF Area */}
+          <div className="flex-1 bg-[#F2F4EC] flex flex-col items-center justify-center relative bg-[radial-gradient(#0A0A0A_2px,transparent_2px)] [background-size:24px_24px]">
+            {/* 🛑 USER: CHANGE THE SRC BELOW TO YOUR GIF FILENAME (e.g. "/your-gif-name.gif") */}
+            {/* Make sure the GIF file is inside the 'apps/web/public' directory! */}
+            <img
+              src="/demo.gif"
+              alt="RAG Explorer Demo"
+              className="absolute inset-0 w-full h-full object-cover z-10 bg-transparent"
+            />
+
+            {/* Helper Text (visible if you haven't added the GIF path yet) */}
+            <div className="text-center bg-white border-4 border-[#0A0A0A] py-3 px-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] z-0">
+              <p className="text-xs sm:text-base font-black uppercase tracking-widest text-[#0A0A0A]">
+                Update the &lt;img src="..." /&gt; in page.tsx
+              </p>
             </div>
           </div>
         </div>
@@ -209,7 +213,7 @@ export default async function LandingPage() {
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-black uppercase mb-20 text-center tracking-tight">
             How It Works
           </h2>
-          
+
           <div className="flex flex-col md:flex-row items-center justify-between gap-12 md:gap-4 relative max-w-5xl mx-auto">
             <div className="flex-1 flex flex-col items-center text-center z-10 w-full">
               <div className="w-20 h-20 rounded-full bg-[#7AB547] border-2 border-[#0A0A0A] flex items-center justify-center text-4xl font-black mb-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:scale-110 transition-transform">
@@ -218,9 +222,9 @@ export default async function LandingPage() {
               <h3 className="text-3xl font-black uppercase mb-4 tracking-wider">UPLOAD</h3>
               <p className="font-medium text-lg max-w-xs">Drop your .txt or .pdf documents into RAG Explorer.</p>
             </div>
-            
+
             <div className="hidden md:block text-5xl font-black mt-[-100px] z-0 opacity-40">→</div>
-            
+
             <div className="flex-1 flex flex-col items-center text-center z-10 w-full">
               <div className="w-20 h-20 rounded-full bg-[#7AB547] border-2 border-[#0A0A0A] flex items-center justify-center text-4xl font-black mb-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:scale-110 transition-transform">
                 2
@@ -228,9 +232,9 @@ export default async function LandingPage() {
               <h3 className="text-3xl font-black uppercase mb-4 tracking-wider">INDEX</h3>
               <p className="font-medium text-lg max-w-xs">We chunk, embed, and store your docs in a vector database.</p>
             </div>
-            
+
             <div className="hidden md:block text-5xl font-black mt-[-100px] z-0 opacity-40">→</div>
-            
+
             <div className="flex-1 flex flex-col items-center text-center z-10 w-full">
               <div className="w-20 h-20 rounded-full bg-[#7AB547] border-2 border-[#0A0A0A] flex items-center justify-center text-4xl font-black mb-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:scale-110 transition-transform">
                 3
@@ -260,15 +264,15 @@ export default async function LandingPage() {
             <div className="text-5xl font-black mb-8 border-b-2 border-black pb-8">$0<span className="text-xl opacity-60">/month</span></div>
             <ul className="space-y-4 mb-10 flex-1 font-bold">
               <li className="flex items-center gap-3">
-                <span className="font-black text-[#7AB547] text-xl" style={{WebkitTextStroke: "1px black"}}>✓</span>
+                <span className="font-black text-[#7AB547] text-xl" style={{ WebkitTextStroke: "1px black" }}>✓</span>
                 5 Documents
               </li>
               <li className="flex items-center gap-3">
-                <span className="font-black text-[#7AB547] text-xl" style={{WebkitTextStroke: "1px black"}}>✓</span>
+                <span className="font-black text-[#7AB547] text-xl" style={{ WebkitTextStroke: "1px black" }}>✓</span>
                 100 Queries/month
               </li>
               <li className="flex items-center gap-3">
-                <span className="font-black text-[#7AB547] text-xl" style={{WebkitTextStroke: "1px black"}}>✓</span>
+                <span className="font-black text-[#7AB547] text-xl" style={{ WebkitTextStroke: "1px black" }}>✓</span>
                 Community Support
               </li>
             </ul>
@@ -317,19 +321,19 @@ export default async function LandingPage() {
             <div className="text-5xl font-black mb-8 border-b-2 border-black pb-8">$99<span className="text-xl opacity-60">/month</span></div>
             <ul className="space-y-4 mb-10 flex-1 font-bold">
               <li className="flex items-center gap-3">
-                <span className="font-black text-[#7AB547] text-xl" style={{WebkitTextStroke: "1px black"}}>✓</span>
+                <span className="font-black text-[#7AB547] text-xl" style={{ WebkitTextStroke: "1px black" }}>✓</span>
                 Custom LLMs
               </li>
               <li className="flex items-center gap-3">
-                <span className="font-black text-[#7AB547] text-xl" style={{WebkitTextStroke: "1px black"}}>✓</span>
+                <span className="font-black text-[#7AB547] text-xl" style={{ WebkitTextStroke: "1px black" }}>✓</span>
                 SLA Guarantee
               </li>
               <li className="flex items-center gap-3">
-                <span className="font-black text-[#7AB547] text-xl" style={{WebkitTextStroke: "1px black"}}>✓</span>
+                <span className="font-black text-[#7AB547] text-xl" style={{ WebkitTextStroke: "1px black" }}>✓</span>
                 Dedicated Manager
               </li>
               <li className="flex items-center gap-3">
-                <span className="font-black text-[#7AB547] text-xl" style={{WebkitTextStroke: "1px black"}}>✓</span>
+                <span className="font-black text-[#7AB547] text-xl" style={{ WebkitTextStroke: "1px black" }}>✓</span>
                 On-premise option
               </li>
             </ul>
@@ -369,14 +373,14 @@ export default async function LandingPage() {
               © 2024 RAG Explorer Inc. Built for speed.
             </p>
           </div>
-          
+
           <div className="flex flex-wrap justify-center gap-6 font-bold uppercase text-sm tracking-wider">
             <Link href="#product" className="hover:text-[#7AB547] transition-colors">Product</Link>
             <Link href="#features" className="hover:text-[#7AB547] transition-colors">Features</Link>
             <Link href="#pricing" className="hover:text-[#7AB547] transition-colors">Pricing</Link>
             <Link href="#docs" className="hover:text-[#7AB547] transition-colors">Docs</Link>
           </div>
-          
+
           <div className="flex flex-wrap justify-center gap-4 text-xs font-bold uppercase opacity-60 tracking-wider">
             <Link href="#" className="hover:text-[#7AB547] transition-colors">Twitter</Link>
             <span className="opacity-30">|</span>
