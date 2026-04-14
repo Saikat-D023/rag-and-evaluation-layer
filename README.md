@@ -1,4 +1,4 @@
-# Production-Grade RAG System
+# RAG with Evaluation Layer
 
 A scalable **Retrieval-Augmented Generation (RAG)** system built as a Turborepo monorepo. It ingests documents, stores semantic embeddings in Supabase, retrieves relevant context via hybrid search, and generates grounded LLM answers — complete with automated faithfulness evaluation and a streaming web API.
 

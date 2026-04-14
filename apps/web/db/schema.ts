@@ -23,6 +23,7 @@ const vector = customType<{ data: number[]; driverData: string }>({
 
 export const documents = pgTable('documents', {
   id: text('id').primaryKey(),
+  userId: uuid('user_id').references(() => profiles.id, { onDelete: 'cascade' }),
   content: text('content'),
   metadata: jsonb('metadata'),
   embedding: vector('embedding'),
@@ -30,6 +31,7 @@ export const documents = pgTable('documents', {
 
 export const evaluationRuns = pgTable('evaluation_runs', {
   id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('user_id').references(() => profiles.id, { onDelete: 'cascade' }),
   runAt: timestamp('run_at').notNull().defaultNow(),
   pipelineConfig: jsonb('pipeline_config'),
   metrics: jsonb('metrics'),
@@ -38,6 +40,7 @@ export const evaluationRuns = pgTable('evaluation_runs', {
 
 export const queryLogs = pgTable('query_logs', {
   id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('user_id').references(() => profiles.id, { onDelete: 'cascade' }),
   query: text('query').notNull(),
   contexts: jsonb('contexts'),
   answer: text('answer'),
@@ -53,6 +56,7 @@ export const profiles = pgTable('profiles', {
 
 export const chatSessions = pgTable('chat_sessions', {
   id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('user_id').references(() => profiles.id, { onDelete: 'cascade' }),
   title: text('title').notNull(),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),

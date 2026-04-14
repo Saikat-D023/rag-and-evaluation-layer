@@ -44,13 +44,14 @@ export const processTextIntoChunks = (text: string, sourceName: string): Chunk[]
     }));
 };
 
-export const insertChunks = async (chunks: Chunk[]) => {
+export const insertChunks = async (chunks: Chunk[], userId?: string) => {
     console.log(`Upserting ${chunks.length} chunks to Supabase...`);
     const { data, error } = await supabase
         .from('documents')
         .upsert(
             chunks.map((c) => ({
                 id: c.id,
+                user_id: userId,
                 content: c.text,
                 metadata: c.metadata,
             }))
@@ -67,13 +68,14 @@ export const generateEmbeddings = async (text: string) => {
     return response.data[0]?.embedding;
 };
 
-export const syncChunksWithEmbeddings = async (chunks: Chunk[]) => {
+export const syncChunksWithEmbeddings = async (chunks: Chunk[], userId?: string) => {
     console.log(`Generating embeddings for ${chunks.length} chunks...`);
     const enrichedChunks = await Promise.all(
         chunks.map(async (chunk) => {
             const embedding = await generateEmbeddings(chunk.text);
             return {
                 id: chunk.id,
+                user_id: userId,
                 content: chunk.text,
                 metadata: chunk.metadata,
                 embedding: embedding,
@@ -86,19 +88,20 @@ export const syncChunksWithEmbeddings = async (chunks: Chunk[]) => {
     if (error) throw error;
 };
 
-export const retrieveRelevantChunks = async (query: string, limit = 3) => {
+export const retrieveRelevantChunks = async (query: string, limit = 3, userId?: string) => {
     const queryEmbedding = await generateEmbeddings(query);
     const { data, error } = await supabase.rpc('match_documents', {
         query_embedding: queryEmbedding,
         match_threshold: 0.3,
         match_count: limit,
+        p_user_id: userId, // Assuming RPC is updated or handles null
     });
     if (error) throw error;
     return data;
 };
 
-export const generateAnswer = async (query: string) => {
-    const contextChunks = await retrieveRelevantChunks(query, 2);
+export const generateAnswer = async (query: string, userId?: string) => {
+    const contextChunks = await retrieveRelevantChunks(query, 2, userId);
     if (!contextChunks || contextChunks.length === 0) {
         return "I'm sorry, I couldn't find any relevant information in the database.";
     }
@@ -117,9 +120,9 @@ export const generateAnswer = async (query: string) => {
     return response.choices[0]?.message?.content;
 };
 
-export const retrieveHybrid = async (query: string, limit = 3) => {
+export const retrieveHybrid = async (query: string, limit = 3, userId?: string) => {
     // 1. Get results from Supabase
-    const vectorResults = await retrieveRelevantChunks(query, 10);
+    const vectorResults = await retrieveRelevantChunks(query, 10, userId);
 
     if (vectorResults.length < 3) {
         return vectorResults.slice(0, limit);

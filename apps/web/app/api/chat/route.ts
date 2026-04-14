@@ -13,6 +13,10 @@ export async function POST(req: Request) {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
+    if (!user) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     try {
         const { messages, sessionId: providedSessionId } = await req.json();
         const lastMessage = messages[messages.length - 1].content;
@@ -23,11 +27,20 @@ export async function POST(req: Request) {
              const [newSession] = await db
                 .insert(chatSessions)
                 .values({ 
+                    userId: user.id,
                     title: lastMessage.slice(0, 50) + (lastMessage.length > 50 ? "..." : "") || 'New Chat' 
                 })
                 .returning();
              if (!newSession) throw new Error("Failed to create chat session");
              sessionId = newSession.id;
+        } else {
+            // Verify session ownership
+            const session = await db.query.chatSessions.findFirst({
+                where: (sessions, { eq, and }) => and(eq(sessions.id, sessionId), eq(sessions.userId, user.id))
+            });
+            if (!session) {
+                return NextResponse.json({ error: "Session not found or unauthorized" }, { status: 404 });
+            }
         }
 
         // 2. Save User Message
@@ -38,7 +51,7 @@ export async function POST(req: Request) {
         });
 
         // 3. Get the facts using your Hybrid logic
-        const contextResults = await retrieveHybrid(lastMessage, 3);
+        const contextResults = await retrieveHybrid(lastMessage, 3, user.id);
 
         // 4. Format context and extract citation metadata
         const contextText = contextResults

@@ -1,4 +1,3 @@
-import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 import ChatClient from "./chat-client";
 
@@ -10,16 +9,9 @@ export default async function DashboardPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Middleware handles this, but adding standard fallback as requested
-  /*
-  if (!user) {
-    redirect("/login");
-  }
-  */
-
   return (
     <main className="h-screen w-full bg-[#F2F4EC] overflow-hidden text-black font-sans">
-      <ChatClient userEmail={user?.email || "Unknown"} />
+      <ChatClient userEmail={user?.email || null} />
     </main>
   );
 }

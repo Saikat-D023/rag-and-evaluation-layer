@@ -29,7 +29,7 @@ const STREAMING_STAGES = [
   "Finalizing response...",
 ];
 
-export default function ChatClient({ userEmail }: { userEmail: string }) {
+export default function ChatClient({ userEmail }: { userEmail: string | null }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
@@ -49,10 +49,13 @@ export default function ChatClient({ userEmail }: { userEmail: string }) {
   const supabase = createClient();
 
   useEffect(() => {
-    fetchStorage();
-  }, []);
+    if (userEmail) {
+      fetchStorage();
+    }
+  }, [userEmail]);
 
   const fetchStorage = async () => {
+    if (!userEmail) return;
     try {
       const res = await fetch("/api/storage");
       if (res.ok) setStorage(await res.json());
@@ -60,6 +63,7 @@ export default function ChatClient({ userEmail }: { userEmail: string }) {
   };
 
   const fetchSessions = async () => {
+    if (!userEmail) return;
     try {
       const res = await fetch("/api/sessions");
       if (res.ok) setSessions(await res.json());
@@ -67,6 +71,7 @@ export default function ChatClient({ userEmail }: { userEmail: string }) {
   };
 
   const fetchDocuments = async () => {
+    if (!userEmail) return;
     try {
       const res = await fetch("/api/documents");
       if (res.ok) setDocuments(await res.json());
@@ -74,6 +79,7 @@ export default function ChatClient({ userEmail }: { userEmail: string }) {
   };
 
   const loadSession = async (sessionId: string) => {
+    if (!userEmail) return;
     try {
       const res = await fetch(`/api/sessions/${sessionId}/messages`);
       if (res.ok) {
@@ -85,6 +91,10 @@ export default function ChatClient({ userEmail }: { userEmail: string }) {
   };
 
   const toggleSection = (section: "history" | "documents" | "settings") => {
+    if (!userEmail && (section === "history" || section === "documents")) {
+      alert("Please login to see your history and documents.");
+      return;
+    }
     if (activeSection === section) {
       setActiveSection(null);
     } else {
@@ -95,6 +105,10 @@ export default function ChatClient({ userEmail }: { userEmail: string }) {
   };
 
   const startNewSession = () => {
+    if (!userEmail) {
+      alert("Please login to start a new chat.");
+      return;
+    }
     setCurrentSessionId(null);
     setMessages([]);
     setActiveSection(null);
@@ -129,8 +143,12 @@ export default function ChatClient({ userEmail }: { userEmail: string }) {
   }, [isStreaming]);
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    router.push("/login");
+    if (userEmail) {
+      await supabase.auth.signOut();
+      router.push("/login");
+    } else {
+      router.push("/login");
+    }
   };
 
   const parseResponsePayload = async (res: Response) => {
@@ -382,9 +400,9 @@ export default function ChatClient({ userEmail }: { userEmail: string }) {
           </div>
           <button
             onClick={handleSignOut}
-            className="w-full bg-black text-white border-2 border-black p-2 text-xs font-bold uppercase hover:text-red-400 transition-colors mt-2"
+            className={`w-full ${userEmail ? "bg-black text-white hover:text-red-400" : "bg-[#7AB547] text-black hover:bg-[#B88A60]"} border-2 border-black p-2 text-xs font-bold uppercase transition-colors mt-2`}
           >
-            Sign Out
+            {userEmail ? "Sign Out" : "Sign In"}
           </button>
         </div>
       </div>
@@ -399,7 +417,7 @@ export default function ChatClient({ userEmail }: { userEmail: string }) {
             </div>
             <div>
               <h2 className="font-black uppercase text-2xl italic tracking-tight">
-                AI ASSISTANT
+                AI ASSISTANT {userEmail ? `• ${userEmail}` : ""}
               </h2>
             </div>
           </div>
@@ -410,7 +428,19 @@ export default function ChatClient({ userEmail }: { userEmail: string }) {
           ref={scrollRef}
           className="flex-1 overflow-y-auto p-4 sm:p-8 space-y-8 scroll-smooth"
         >
-          {messages.length === 0 ? (
+          {!userEmail ? (
+            <div className="h-full flex flex-col items-center justify-center space-y-6">
+              <div className="font-black text-2xl sm:text-4xl text-center uppercase max-w-lg">
+                PLEASE SIGN IN TO START EXPLORING YOUR DOCUMENTS
+              </div>
+              <Link
+                href="/login"
+                className="bg-[#B88A60] text-black border-2 border-black font-bold uppercase p-4 text-lg hover:bg-gray-900 hover:text-white transition-all shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+              >
+                Go to Login
+              </Link>
+            </div>
+          ) : messages.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center opacity-30 pointer-events-none">
               <div className="font-black text-2xl sm:text-4xl text-center uppercase">
                 Ask anything about your documents
@@ -463,7 +493,13 @@ export default function ChatClient({ userEmail }: { userEmail: string }) {
             />
             <button
               type="button"
-              onClick={() => fileInputRef.current?.click()}
+              onClick={() => {
+                if (!userEmail) {
+                  alert("Please login to upload documents.");
+                  return;
+                }
+                fileInputRef.current?.click();
+              }}
               disabled={isUploading || isStreaming}
               className={`shrink-0 p-3 border-2 border-black transition-colors ${isUploading ? "bg-gray-300 animate-pulse" : "bg-[#F2F4EC] hover:bg-[#7AB547]"}`}
               title="Add document"
@@ -486,9 +522,9 @@ export default function ChatClient({ userEmail }: { userEmail: string }) {
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              disabled={isStreaming || isUploading}
+              disabled={isStreaming || isUploading || !userEmail}
               className="flex-1 bg-white border-2 border-black p-3 focus:outline-none focus:ring-4 focus:ring-[#7AB547] font-medium disabled:opacity-50 transition-all rounded-none"
-              placeholder={isUploading ? "Uploading document..." : isStreaming ? "Assistant is working..." : "Ask your question..."}
+              placeholder={!userEmail ? "Sign in to chat..." : isUploading ? "Uploading document..." : isStreaming ? "Assistant is working..." : "Ask your question..."}
             />
             <button
               type="submit"
