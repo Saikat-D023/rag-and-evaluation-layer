@@ -67,6 +67,7 @@ export const chatMessages = pgTable('chat_messages', {
   sessionId: uuid('session_id')
     .notNull()
     .references(() => chatSessions.id, { onDelete: 'cascade' }),
+  userId: uuid('user_id').references(() => profiles.id, { onDelete: 'cascade' }),
   role: text('role').notNull(),
   content: text('content').notNull(),
   metadata: jsonb('metadata'),

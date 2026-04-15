@@ -4,6 +4,8 @@ import { documents } from '@/db/schema';
 import { sql, eq } from 'drizzle-orm';
 import { createClient } from "@/utils/supabase/server";
 
+const MAX_CHUNKS = 10000;
+
 export async function GET() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -21,7 +23,6 @@ export async function GET() {
       .where(eq(documents.userId, user.id));
 
     const totalChunks = result[0]?.totalChunks || 0;
-...
     const percentage = Math.min(Math.round((totalChunks / MAX_CHUNKS) * 100), 100);
 
     return NextResponse.json({

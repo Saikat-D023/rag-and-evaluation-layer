@@ -16,6 +16,7 @@
     "@repo/ui": "workspace:*",
     "@supabase/ssr": "^0.9.0",
     "drizzle-orm": "^0.45.2",
+    "framer-motion": "^12.38.0",
     "mammoth": "^1.12.0",
     "next": "16.1.5",
     "openai": "^6.29.0",
