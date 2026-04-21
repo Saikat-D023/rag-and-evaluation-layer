@@ -38,6 +38,8 @@ export default function ChatClient({ userEmail }: { userEmail: string | null }) 
   const [loadingLabel, setLoadingLabel] = useState(STREAMING_STAGES[0]);
   
   const [activeSection, setActiveSection] = useState<"history" | "documents" | "settings" | null>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const [sessions, setSessions] = useState<Session[]>([]);
   const [documents, setDocuments] = useState<DocumentStat[]>([]);
   const [storage, setStorage] = useState({ percentage: 0, totalChunks: 0, maxChunks: 10000 });
@@ -47,6 +49,19 @@ export default function ChatClient({ userEmail }: { userEmail: string | null }) 
   const scrollRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const supabase = createClient();
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 1024) {
+        setIsSidebarOpen(false);
+      } else {
+        setIsSidebarOpen(true);
+      }
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   useEffect(() => {
     if (userEmail) {
@@ -86,13 +101,15 @@ export default function ChatClient({ userEmail }: { userEmail: string | null }) 
         const msgs = await res.json();
         setMessages(msgs);
         setCurrentSessionId(sessionId);
+        // Close sidebar on mobile after selection
+        if (window.innerWidth < 1024) setIsSidebarOpen(false);
       }
     } catch(e) { console.error("Failed to load session messages", e); }
   };
 
   const toggleSection = (section: "history" | "documents" | "settings") => {
     if (!userEmail && (section === "history" || section === "documents")) {
-      alert("Please login to see your history and documents.");
+      setShowAuthModal(true);
       return;
     }
     if (activeSection === section) {
@@ -106,12 +123,14 @@ export default function ChatClient({ userEmail }: { userEmail: string | null }) 
 
   const startNewSession = () => {
     if (!userEmail) {
-      alert("Please login to start a new chat.");
+      setShowAuthModal(true);
       return;
     }
     setCurrentSessionId(null);
     setMessages([]);
     setActiveSection(null);
+    // Close sidebar on mobile after selection
+    if (window.innerWidth < 1024) setIsSidebarOpen(false);
   };
 
   useEffect(() => {
@@ -308,20 +327,36 @@ export default function ChatClient({ userEmail }: { userEmail: string | null }) 
   };
 
   return (
-    <div className="flex h-screen w-full font-sans text-[#1A1A1A] overflow-hidden selection:bg-[#92B57A] selection:text-white">
+    <div className="flex h-screen w-full font-sans text-[#1A1A1A] overflow-hidden selection:bg-[#92B57A] selection:text-white relative">
+      {/* MOBILE BACKDROP */}
+      <AnimatePresence>
+        {isSidebarOpen && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setIsSidebarOpen(false)}
+            className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          />
+        )}
+      </AnimatePresence>
+
       {/* LEFT SIDEBAR */}
-      <motion.div 
-        initial={{ x: -260 }}
-        animate={{ x: 0 }}
-        transition={{ type: "spring" as const, stiffness: 100, damping: 20 }}
-        className="w-[260px] shrink-0 border-r-2 border-[#1A1A1A] flex flex-col bg-white overflow-hidden"
-      >
-        <div className="bg-[#92B57A] border-b-2 border-[#1A1A1A] p-6 font-display font-black uppercase text-xl leading-none flex items-center gap-2">
-          <div className="w-4 h-4 bg-white border-2 border-[#1A1A1A]"></div>
-          RAG EXPLORER
-        </div>
-        
-        <nav className="flex-1 flex flex-col uppercase font-bold text-[10px] tracking-widest overflow-y-auto">
+      <AnimatePresence mode="wait">
+        {isSidebarOpen && (
+          <motion.div 
+            initial={{ x: -260 }}
+            animate={{ x: 0 }}
+            exit={{ x: -260 }}
+            transition={{ type: "spring" as const, stiffness: 100, damping: 20 }}
+            className="fixed lg:relative z-50 lg:z-auto w-[260px] h-full shrink-0 border-r-2 border-[#1A1A1A] flex flex-col bg-white overflow-hidden"
+          >
+            <div className="bg-[#92B57A] border-b-2 border-[#1A1A1A] p-6 font-display font-black uppercase text-xl leading-none flex items-center gap-2">
+              <div className="w-4 h-4 bg-white border-2 border-[#1A1A1A]"></div>
+              RAG EXPLORER
+            </div>
+            
+            <nav className="flex-1 flex flex-col uppercase font-bold text-[10px] tracking-widest overflow-y-auto">
           <motion.button 
             whileHover={{ backgroundColor: "#1A1A1A", color: "#FFFFFF" }}
             whileTap={{ scale: 0.98 }}
@@ -470,6 +505,8 @@ export default function ChatClient({ userEmail }: { userEmail: string | null }) 
           </motion.button>
         </div>
       </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* MAIN PANEL */}
       <div className="flex-1 flex flex-col h-full bg-[#F9F8F3] overflow-hidden">
@@ -477,12 +514,19 @@ export default function ChatClient({ userEmail }: { userEmail: string | null }) 
         <motion.div 
           initial={{ y: -80 }}
           animate={{ y: 0 }}
-          className="h-[80px] border-b-2 border-[#1A1A1A] flex items-center px-8 justify-between shrink-0 bg-white z-10"
+          className="h-[80px] border-b-2 border-[#1A1A1A] flex items-center px-4 sm:px-8 justify-between shrink-0 bg-white z-10"
         >
           <div className="flex items-center gap-4">
+            <button 
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              className="p-2 border-2 border-[#1A1A1A] bg-white shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] active:shadow-none active:translate-x-0.5 active:translate-y-0.5 transition-all"
+              title={isSidebarOpen ? "Close Sidebar" : "Open Sidebar"}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+            </button>
             <motion.div 
               whileHover={{ rotate: 15 }}
-              className="bg-[#92B57A] border-2 border-[#1A1A1A] p-2.5 shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] text-white"
+              className="hidden min-[500px]:flex bg-[#92B57A] border-2 border-[#1A1A1A] p-2.5 shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] text-white"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"></rect><circle cx="12" cy="5" r="2"></circle><path d="M12 7v4"></path><line x1="8" y1="16" x2="8.01" y2="16"></line><line x1="16" y1="16" x2="16.01" y2="16"></line></svg>
             </motion.div>
@@ -501,35 +545,35 @@ export default function ChatClient({ userEmail }: { userEmail: string | null }) 
         {/* Chat thread */}
         <div
           ref={scrollRef}
-          className="flex-1 overflow-y-auto p-6 sm:p-10 space-y-10 scroll-smooth"
+          className="flex-1 overflow-y-auto p-4 sm:p-10 space-y-10 scroll-smooth"
         >
           {!userEmail ? (
-            <div className="h-full flex flex-col items-center justify-center space-y-8">
+            <div className="h-full flex flex-col items-center justify-center space-y-8 px-4">
               <motion.div 
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                className="font-display font-black text-3xl sm:text-5xl text-center uppercase max-w-xl tracking-tighter leading-none"
+                className="font-display font-black text-2xl sm:text-5xl text-center uppercase max-w-xl tracking-tighter leading-none"
               >
                 PLEASE <span className="text-[#92B57A]">SIGN IN</span> TO START EXPLORING YOUR DOCUMENTS
               </motion.div>
               <motion.div whileHover={{ scale: 1.05, rotate: -2 }} whileTap={{ scale: 0.95 }}>
                 <Link
                   href="/login"
-                  className="bg-[#D1D1F7] text-[#1A1A1A] border-2 border-[#1A1A1A] font-black uppercase py-5 px-10 text-sm tracking-widest hover:bg-[#92B57A] hover:text-white transition-all shadow-[8px_8px_0px_0px_rgba(26,26,26,1)] inline-block"
+                  className="bg-[#D1D1F7] text-[#1A1A1A] border-2 border-[#1A1A1A] font-black uppercase py-4 sm:py-5 px-8 sm:px-10 text-xs sm:text-sm tracking-widest hover:bg-[#92B57A] hover:text-white transition-all shadow-[8px_8px_0px_0px_rgba(26,26,26,1)] inline-block"
                 >
                   Go to Login
                 </Link>
               </motion.div>
             </div>
           ) : messages.length === 0 ? (
-            <div className="h-full flex flex-col items-center justify-center opacity-10 pointer-events-none select-none">
+            <div className="h-full flex flex-col items-center justify-center opacity-10 pointer-events-none select-none px-4">
               <motion.div 
                 animate={{ 
                   y: [0, -20, 0],
                   rotate: [0, 5, -5, 0]
                 }}
                 transition={{ duration: 10, repeat: Infinity }}
-                className="font-display font-black text-4xl sm:text-7xl text-center uppercase tracking-tighter leading-none"
+                className="font-display font-black text-3xl sm:text-7xl text-center uppercase tracking-tighter leading-none"
               >
                 ASK ANYTHING<br/>ABOUT YOUR DATA
               </motion.div>
@@ -542,7 +586,7 @@ export default function ChatClient({ userEmail }: { userEmail: string | null }) 
                   initial={{ y: 20, opacity: 0, scale: 0.95 }}
                   animate={{ y: 0, opacity: 1, scale: 1 }}
                   layout
-                  className={`max-w-3xl flex flex-col ${
+                  className={`w-full max-w-3xl flex flex-col ${
                     msg.role === "user" ? "ml-auto items-end" : "mr-auto items-start"
                   }`}
                 >
@@ -550,12 +594,12 @@ export default function ChatClient({ userEmail }: { userEmail: string | null }) 
                     {msg.role === "user" ? "LOCAL_USER" : "CORE_AI"}
                   </div>
                   {msg.role === "user" ? (
-                    <div className="bg-[#92B57A] text-white border-2 border-[#1A1A1A] px-6 py-4 font-bold shadow-[6px_6px_0px_0px_rgba(26,26,26,1)] text-sm">
+                    <div className="bg-[#92B57A] text-white border-2 border-[#1A1A1A] px-4 sm:px-6 py-3 sm:py-4 font-bold shadow-[6px_6px_0px_0px_rgba(26,26,26,1)] text-sm sm:text-base">
                       {msg.content}
                     </div>
                   ) : (
-                    <div className="w-full max-w-full">
-                      <div className="bg-white text-[#1A1A1A] border-2 border-[#1A1A1A] px-6 py-5 font-medium shadow-[6px_6px_0px_0px_rgba(209,209,247,1)] whitespace-pre-wrap leading-relaxed text-base">
+                    <div className="w-full">
+                      <div className="bg-white text-[#1A1A1A] border-2 border-[#1A1A1A] px-4 sm:px-6 py-4 sm:py-5 font-medium shadow-[6px_6px_0px_0px_rgba(209,209,247,1)] whitespace-pre-wrap leading-relaxed text-sm sm:text-base">
                         {msg.content || (msg.isStreaming ? (
                           <span className="flex items-center gap-2">
                             <motion.span 
@@ -586,7 +630,7 @@ export default function ChatClient({ userEmail }: { userEmail: string | null }) 
         <motion.div 
           initial={{ y: 100 }}
           animate={{ y: 0 }}
-          className="shrink-0 p-6 sm:p-10 bg-white border-t-2 border-[#1A1A1A] relative z-10"
+          className="shrink-0 p-4 sm:p-10 bg-white border-t-2 border-[#1A1A1A] relative z-10"
         >
           <form
             onSubmit={handleSubmit}
@@ -605,7 +649,7 @@ export default function ChatClient({ userEmail }: { userEmail: string | null }) 
               type="button"
               onClick={() => {
                 if (!userEmail) {
-                  alert("Please login to upload documents.");
+                  setShowAuthModal(true);
                   return;
                 }
                 fileInputRef.current?.click();
@@ -671,6 +715,59 @@ export default function ChatClient({ userEmail }: { userEmail: string | null }) 
           </div>
         </motion.div>
       </div>
+
+      {/* AUTH MODAL */}
+      <AnimatePresence>
+        {showAuthModal && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowAuthModal(false)}
+              className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="bg-white border-4 border-[#1A1A1A] p-8 sm:p-12 max-w-md w-full relative z-[101] shadow-[12px_12px_0px_0px_rgba(26,26,26,1)]"
+            >
+              <button 
+                onClick={() => setShowAuthModal(false)}
+                className="absolute top-4 right-4 text-2xl font-black hover:text-[#92B57A] transition-colors"
+              >
+                ×
+              </button>
+              <div className="text-center space-y-6">
+                <div className="w-16 h-16 bg-[#D1D1F7] border-2 border-[#1A1A1A] mx-auto flex items-center justify-center">
+                   <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"></rect><circle cx="12" cy="5" r="2"></circle><path d="M12 7v4"></path></svg>
+                </div>
+                <h3 className="font-display font-black text-3xl uppercase tracking-tighter leading-none">
+                  ACCESS <span className="text-[#92B57A]">RESTRICTED</span>
+                </h3>
+                <p className="font-bold text-sm uppercase tracking-widest opacity-60 leading-relaxed">
+                  Please sign in to your account to access history, documents, and start new chat sessions.
+                </p>
+                <div className="pt-4 space-y-4">
+                  <Link 
+                    href="/login"
+                    className="block w-full bg-[#1A1A1A] text-white font-black uppercase py-4 tracking-widest text-xs hover:bg-[#92B57A] transition-all shadow-[4px_4px_0px_0px_rgba(146,181,122,1)]"
+                  >
+                    Go to Login
+                  </Link>
+                  <button 
+                    onClick={() => setShowAuthModal(false)}
+                    className="block w-full font-black uppercase py-2 tracking-widest text-[10px] opacity-40 hover:opacity-100 transition-all"
+                  >
+                    Continue as Guest
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

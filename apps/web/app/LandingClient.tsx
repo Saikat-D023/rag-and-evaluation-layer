@@ -1,10 +1,21 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
+import Cal, { getCalApi } from "@calcom/embed-react";
 
 export default function LandingClient({ user }: { user: any }) {
+  const [isCalOpen, setIsCalOpen] = useState(false);
   const { scrollYProgress } = useScroll();
+
+  useEffect(() => {
+    (async function () {
+      const cal = await getCalApi({ namespace: "30min" });
+      cal("ui", { hideEventTypeDetails: false, layout: "month_view" });
+    })();
+  }, []);
+
   const opacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
   const scale = useTransform(scrollYProgress, [0, 0.2], [1, 0.9]);
 
@@ -159,12 +170,12 @@ export default function LandingClient({ user }: { user: any }) {
               </Link>
             </motion.div>
             <motion.div whileHover={{ scale: 1.05, x: 2, y: 2 }} whileTap={{ scale: 0.98 }}>
-              <Link
-                href="#demo"
+              <button
+                onClick={() => setIsCalOpen(true)}
                 className="text-center px-10 py-5 bg-white border-2 border-[#1A1A1A] text-sm font-black uppercase tracking-widest rounded-full shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] transition-all inline-block w-full sm:w-auto"
               >
                 Book Demo
-              </Link>
+              </button>
             </motion.div>
           </motion.div>
         </div>
@@ -566,6 +577,25 @@ export default function LandingClient({ user }: { user: any }) {
           </div>
         </div>
       </footer>
+
+      {isCalOpen && (
+        <div className="fixed inset-0 z-[100] bg-black/50 flex items-center justify-center p-4 md:p-10">
+          <div className="bg-white w-full h-full max-w-5xl max-h-[90vh] rounded-[32px] overflow-hidden relative border-2 border-[#1A1A1A] shadow-2xl">
+            <button 
+              onClick={() => setIsCalOpen(false)}
+              className="absolute top-6 right-6 z-[101] w-12 h-12 bg-[#1A1A1A] text-white rounded-full flex items-center justify-center font-bold border-2 border-[#1A1A1A] hover:bg-[#92B57A] transition-colors"
+            >
+              ×
+            </button>
+            <Cal 
+              namespace="30min"
+              calLink="saikat-dey-arschd/30min"
+              style={{width:"100%",height:"100%",overflow:"scroll"}}
+              config={{"layout":"month_view","useSlotsViewOnSmallScreen":"true"}}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
