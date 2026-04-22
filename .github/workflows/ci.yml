@@ -19,28 +19,22 @@ jobs:
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: 9
 
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'pnpm'
-          cache-dependency-path: rag-and-evaluation-layer/pnpm-lock.yaml
+          cache-dependency-path: pnpm-lock.yaml
 
       - name: Install dependencies
-        working-directory: rag-and-evaluation-layer
         run: pnpm install --frozen-lockfile
 
       - name: Lint
-        working-directory: rag-and-evaluation-layer
         run: pnpm run lint
 
       - name: Type Check
-        working-directory: rag-and-evaluation-layer
         run: pnpm run check-types
 
       - name: Build
-        working-directory: rag-and-evaluation-layer
         run: pnpm run build
