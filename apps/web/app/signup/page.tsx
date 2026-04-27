@@ -42,8 +42,9 @@ export default function SignupPage() {
       }
 
       setSuccess(true);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      const error = err as { message?: string };
+      setError(error.message ?? 'An error occurred');
     } finally {
       setLoading(false);
     }
@@ -80,8 +81,8 @@ export default function SignupPage() {
               className="text-center space-y-8"
             >
               <div className="bg-[#92B57A] border-2 border-[#1A1A1A] p-8 font-bold shadow-[8px_8px_0px_0px_rgba(26,26,26,1)] text-white rounded-2xl">
-                <div className="text-[10px] uppercase tracking-[0.4em] mb-4 opacity-70">verification_required</div>
-                <div className="text-xl uppercase tracking-tighter">CHECK YOUR EMAIL</div>
+                <div className="text-[10px] uppercase tracking-[0.4em] mb-4 opacity-70">account_created</div>
+                <div className="text-xl uppercase tracking-tighter">SUCCESSFULLY REGISTERED</div>
                 <div className="text-[10px] mt-4 opacity-90 normal-case">{email}</div>
               </div>
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
@@ -142,7 +143,7 @@ export default function SignupPage() {
                   htmlFor="password"
                   className="block text-[10px] font-black uppercase tracking-[0.3em] opacity-40 ml-1"
                 >
-                  Passphrase
+                  Password
                 </label>
                 <input
                   id="password"
@@ -161,7 +162,7 @@ export default function SignupPage() {
                   htmlFor="confirmPassword"
                   className="block text-[10px] font-black uppercase tracking-[0.3em] opacity-40 ml-1"
                 >
-                  Verification
+                  Confirm Password
                 </label>
                 <input
                   id="confirmPassword"
@@ -169,7 +170,7 @@ export default function SignupPage() {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   className="w-full border-2 border-[#1A1A1A] p-4 bg-white focus:outline-none focus:ring-4 focus:ring-[#92B57A]/20 transition-all rounded-2xl font-bold"
-                  placeholder="REPEAT_PASSPHRASE"
+                  placeholder="REPEAT_PASSWORD"
                   required
                   disabled={loading}
                 />

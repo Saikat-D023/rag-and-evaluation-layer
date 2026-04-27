@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll } from "framer-motion";
 import Cal, { getCalApi } from "@calcom/embed-react";
+import Image from "next/image";
 
-export default function LandingClient({ user }: { user: any }) {
+export default function LandingClient({ user }: { user: unknown }) {
   const [isCalOpen, setIsCalOpen] = useState(false);
-  const { scrollYProgress } = useScroll();
+  useScroll();
 
   useEffect(() => {
     (async function () {
@@ -15,9 +16,6 @@ export default function LandingClient({ user }: { user: any }) {
       cal("ui", { hideEventTypeDetails: false, layout: "month_view" });
     })();
   }, []);
-
-  const opacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
-  const scale = useTransform(scrollYProgress, [0, 0.2], [1, 0.9]);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -237,10 +235,12 @@ export default function LandingClient({ user }: { user: any }) {
           </div>
           {/* Demo GIF Area */}
           <div className="flex-1 bg-white flex flex-col items-center justify-center relative">
-            <img
+            <Image
               src="/demo.gif"
               alt="RAG Explorer Demo"
               className="absolute inset-0 w-full h-full object-cover grayscale-[0.5] group-hover:grayscale-0 transition-all duration-700"
+              fill
+              unoptimized
             />
           </div>
         </motion.div>

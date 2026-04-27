@@ -15,7 +15,10 @@ export async function createClient() {
                         cookiesToSet.forEach(({ name, value, options }) =>
                             cookieStore.set(name, value, options)
                         )
-                    } catch { }
+                    } catch (error: unknown) {
+                        // Ignore cookie setting errors during server-side operations
+                        void error;
+                    }
                 },
             },
         }

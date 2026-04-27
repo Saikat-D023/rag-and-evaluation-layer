@@ -18,6 +18,11 @@
     "lint": {
       "dependsOn": [
         "^lint"
+      ],
+      "env": [
+        "OPENAI_API_KEY",
+        "DATABASE_URL",
+        "SUPABASE_SERVICE_ROLE_KEY"
       ]
     },
     "check-types": {

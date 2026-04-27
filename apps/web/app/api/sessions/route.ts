@@ -24,8 +24,9 @@ export async function GET() {
       .orderBy(desc(chatSessions.updatedAt));
     
     return NextResponse.json(sessions);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const err = error as { message?: string };
+    return NextResponse.json({ error: err.message ?? 'Unknown error' }, { status: 500 });
   }
 }
 
@@ -48,7 +49,8 @@ export async function POST(req: Request) {
       .returning();
       
     return NextResponse.json(newSession);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const err = error as { message?: string };
+    return NextResponse.json({ error: err.message ?? 'Unknown error' }, { status: 500 });
   }
 }

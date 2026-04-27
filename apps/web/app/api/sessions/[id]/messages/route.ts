@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/db';
-import { chatMessages, chatSessions } from '@/db/schema';
-import { eq, asc, and } from 'drizzle-orm';
+import { chatMessages } from '@/db/schema';
+import { eq, asc } from 'drizzle-orm';
 import { createClient } from "@/utils/supabase/server";
 
 export async function GET(
@@ -44,7 +44,8 @@ export async function GET(
       .orderBy(asc(chatMessages.createdAt));
       
     return NextResponse.json(messages);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const err = error as { message?: string };
+    return NextResponse.json({ error: err.message ?? 'Unknown error' }, { status: 500 });
   }
 }

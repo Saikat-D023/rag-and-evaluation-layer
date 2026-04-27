@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { db } from "@/db";
 import { chatSessions, chatMessages } from "@/db/schema";
+import { eq, and } from "drizzle-orm";
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
@@ -35,9 +36,12 @@ export async function POST(req: Request) {
              sessionId = newSession.id;
         } else {
             // Verify session ownership
-            const session = await db.query.chatSessions.findFirst({
-                where: (sessions, { eq, and }) => and(eq(sessions.id, sessionId), eq(sessions.userId, user.id))
-            });
+            const [session] = await db
+                .select()
+                .from(chatSessions)
+                .where(and(eq(chatSessions.id, sessionId), eq(chatSessions.userId, user.id)))
+                .limit(1);
+
             if (!session) {
                 return NextResponse.json({ error: "Session not found or unauthorized" }, { status: 404 });
             }
@@ -51,14 +55,14 @@ export async function POST(req: Request) {
         });
 
         // 3. Get the facts using your Hybrid logic
-        const contextResults = await retrieveHybrid(lastMessage, 3, user.id);
+        const contextResults = await retrieveHybrid(lastMessage, 3, user.id) as Array<{ id: string; content: string; metadata?: { source?: string; chunkIndex?: number } }>;
 
         // 4. Format context and extract citation metadata
         const contextText = contextResults
-            .map((c: any) => `[ID: ${c.id}] Content: ${c.content}`)
+            .map((c) => `[ID: ${c.id}] Content: ${c.content}`)
             .join("\n\n");
 
-        const citations = contextResults.map((c: any) => ({
+        const citations = contextResults.map((c) => ({
             id: c.id,
             source: c.metadata?.source || "Unknown",
             chunkIndex: c.metadata?.chunkIndex
@@ -106,8 +110,9 @@ export async function POST(req: Request) {
                         content: fullAssistantMessage,
                         metadata: { citations },
                     });
-                } catch(e) {
-                    console.error("Failed to save assistant message", e);
+                } catch (error: unknown) {
+                    const err = error as { message?: string };
+                    console.error("Failed to save assistant message", err.message);
                 }
 
                 controller.close();

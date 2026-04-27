@@ -1,5 +1,7 @@
-import { createClient } from '@/utils/supabase/server'
+import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
+import { db } from '@/db'
+import { profiles } from '@/db/schema'
 
 export async function POST(req: Request) {
     try {
@@ -7,19 +9,24 @@ export async function POST(req: Request) {
         const { email, password, fullName } = body
         console.log('Signup attempt for:', email)
 
-        const supabase = await createClient()
-        const projectUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-        console.log('Using Supabase Project:', projectUrl)
+        const supabaseAdmin = createClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.SUPABASE_SERVICE_ROLE_KEY!,
+            {
+                auth: {
+                    autoConfirm: true,
+                    persistSession: false
+                }
+            }
+        )
 
-        const { data, error } = await supabase.auth.signUp({
+        const { data, error } = await supabaseAdmin.auth.admin.createUser({
             email,
             password,
-            options: {
-                data: {
-                    full_name: fullName,
-                },
-                emailRedirectTo: `${new URL(req.url).origin}/auth/callback`,
-            },
+            email_confirm: true,
+            user_metadata: {
+                full_name: fullName,
+            }
         });
 
         if (error) {
@@ -27,14 +34,25 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: error.message }, { status: 400 })
         }
 
-        console.log('Signup successful!')
-        console.log('User ID:', data.user?.id)
-        console.log('User Email:', data.user?.email)
-        console.log('Confirmation Sent to:', data.user?.email)
+        if (data.user) {
+            try {
+                await db.insert(profiles).values({
+                    id: data.user.id,
+                    fullName: fullName,
+                });
+                console.log('Profile created for user:', data.user.id);
+            } catch (dbError: unknown) {
+                const error = dbError as { message?: string };
+                console.error('Failed to create profile:', error.message);
+                // We don't return error here because the user IS created in Supabase
+            }
+        }
 
-        return NextResponse.json({ message: 'Check your email for confirmation!', user: data.user })
-    } catch (err: any) {
-        console.error('API Route Error:', err.message)
+        console.log('Signup successful (auto-confirmed)!')
+        return NextResponse.json({ message: 'Signup successful!', user: data.user })
+    } catch (err: unknown) {
+        const error = err as { message?: string };
+        console.error('API Route Error:', error.message)
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
     }
 }

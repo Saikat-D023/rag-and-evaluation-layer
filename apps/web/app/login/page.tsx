@@ -31,8 +31,9 @@ export default function LoginPage() {
       }
 
       router.push("/dashboard");
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      const error = err as { message?: string };
+      setError(error.message ?? 'An error occurred');
     } finally {
       setLoading(false);
     }

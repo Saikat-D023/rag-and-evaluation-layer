@@ -31,7 +31,8 @@ export async function GET() {
       percentage,
       estimatedSizeMB: (totalChunks * 1.5) / 1024, // Assuming ~1.5KB per chunk on avg
     });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const err = error as { message?: string };
+    return NextResponse.json({ error: err.message ?? 'Unknown error' }, { status: 500 });
   }
 }

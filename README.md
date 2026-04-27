@@ -90,15 +90,58 @@ SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
 npm install
 ```
 
-### Supabase Setup
+## Database & ORM
 
-Your Supabase database needs two tables and one RPC function:
+The project uses **Drizzle ORM** for type-safe database operations:
 
-1. A `documents` table to store chunks and embeddings
-2. An `evaluation_runs` table for storing eval metrics
-3. A `match_documents` RPC function for vector similarity search (uses `pgvector`)
+- **Schema:** Defined in `apps/web/db/schema.ts`
+- **Tables:**
+  - `profiles` — User profiles created on signup with full name and metadata
+  - `chatSessions` — Stores conversation sessions linked to users
+  - `chatMessages` — Stores individual messages within sessions
+  - `documents` — Stores RAG document chunks with embeddings (from rag-core)
+  - `evaluation_runs` — Stores evaluation metrics from faithfulness scoring
+
+Database queries use Drizzle's builder API:
+```typescript
+// Example: Verify session ownership
+const [session] = await db
+  .select()
+  .from(chatSessions)
+  .where(and(eq(chatSessions.id, sessionId), eq(chatSessions.userId, userId)))
+  .limit(1);
+```
+
+### Supabase Schema
+
+Your Supabase database needs the following setup:
+
+1. **Tables** (managed via Drizzle migrations):
+   - `profiles` — User account data
+   - `chatSessions` — Conversation sessions
+   - `chatMessages` — Messages in sessions
+   - `documents` — Document chunks with embeddings
+   - `evaluation_runs` — Evaluation metrics
+
+2. **RPC Function:** `match_documents` for vector similarity search (uses `pgvector`)
+
+3. **Extensions:** `pgvector` must be enabled on your Supabase project
 
 > Refer to your Supabase migration files for the exact schema.
+
+---
+
+## Environment Configuration
+
+The system automatically loads environment variables from `.env.local` or `.env` files by searching up to 5 directory levels:
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
+OPENAI_API_KEY=your_openai_key
+```
+
+The environment loading includes improved logging to help debug configuration issues.
 
 ---
 
@@ -165,7 +208,7 @@ For each Q&A pair in `data/golden-dataset/qa-pairs.json`, this script:
 
 ---
 
-## Web API
+## Web API & Authentication
 
 Start the Next.js web app:
 
@@ -174,20 +217,38 @@ cd apps/web
 npm run dev
 ```
 
+### Authentication
+
+The system uses Supabase for authentication with **auto-confirmed signups**:
+- New users sign up via `/signup` endpoint with email and password
+- Users are automatically confirmed without email verification
+- User profiles are created in the `profiles` table with their metadata
+- Sessions are managed securely with Supabase Auth and Drizzle ORM
+
+**Sign-up Endpoint:** `POST /api/(auth)/signup`
+```json
+{
+  "email": "user@example.com",
+  "password": "secure_password",
+  "fullName": "User Name"
+}
+```
+
 ### `POST /api/chat`
 
-Streams a RAG-generated answer to the client in real-time.
+Streams a RAG-generated answer to the client in real-time. Requires authenticated session.
 
 **Request body:**
 ```json
 {
   "messages": [
     { "role": "user", "content": "What is RAG?" }
-  ]
+  ],
+  "sessionId": "optional-session-id"
 }
 ```
 
-**Response:** A `ReadableStream` with citation metadata (source files, chunk IDs) prepended, followed by the streamed answer text.
+**Response:** A `ReadableStream` with citation metadata (source files, chunk IDs) prepended, followed by the streamed answer text. Sessions are persisted to the `chatSessions` and `chatMessages` tables.
 
 ### `POST /api/ingest`
 

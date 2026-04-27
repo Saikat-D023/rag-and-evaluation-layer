@@ -5,7 +5,6 @@ import {
   jsonb,
   integer,
   uuid,
-  doublePrecision,
   customType,
 } from 'drizzle-orm/pg-core';
 

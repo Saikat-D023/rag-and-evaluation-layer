@@ -6,16 +6,20 @@ import * as fs from 'fs';
 function loadEnv() {
     let currentDir = process.cwd();
     const candidateNames = ['.env.local', '.env'];
-    // Walk upward to find either a local app env file or the repo root env file.
+    
+    // Check current directory and up to 5 levels up
     for (let i = 0; i < 5; i++) {
         for (const candidateName of candidateNames) {
             const envPath = path.join(currentDir, candidateName);
             if (fs.existsSync(envPath)) {
                 dotenv.config({ path: envPath });
+                console.log(`[rag-core] Loaded env from: ${envPath}`);
                 return;
             }
         }
-        currentDir = path.join(currentDir, '..');
+        const parentDir = path.join(currentDir, '..');
+        if (parentDir === currentDir) break;
+        currentDir = parentDir;
     }
 }
 

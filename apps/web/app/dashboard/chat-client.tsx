@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import Link from "next/link";
@@ -63,26 +63,32 @@ export default function ChatClient({ userEmail }: { userEmail: string | null }) 
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  useEffect(() => {
-    if (userEmail) {
-      fetchStorage();
-    }
-  }, [userEmail]);
-
-  const fetchStorage = async () => {
+  const fetchStorage = useCallback(async () => {
     if (!userEmail) return;
     try {
       const res = await fetch("/api/storage");
       if (res.ok) setStorage(await res.json());
-    } catch (e) { console.error("Storage fetch failed", e); }
-  };
+    } catch (error: unknown) {
+      const err = error as { message?: string };
+      console.error("Storage fetch failed", err.message);
+    }
+  }, [userEmail]);
+
+  useEffect(() => {
+    if (userEmail) {
+      fetchStorage();
+    }
+  }, [userEmail, fetchStorage]);
 
   const fetchSessions = async () => {
     if (!userEmail) return;
     try {
       const res = await fetch("/api/sessions");
       if (res.ok) setSessions(await res.json());
-    } catch (e) { console.error("Sessions fetch failed", e); }
+    } catch (error: unknown) {
+      const err = error as { message?: string };
+      console.error("Sessions fetch failed", err.message);
+    }
   };
 
   const fetchDocuments = async () => {
@@ -90,7 +96,10 @@ export default function ChatClient({ userEmail }: { userEmail: string | null }) 
     try {
       const res = await fetch("/api/documents");
       if (res.ok) setDocuments(await res.json());
-    } catch (e) { console.error("Documents fetch failed", e); }
+    } catch (error: unknown) {
+      const err = error as { message?: string };
+      console.error("Documents fetch failed", err.message);
+    }
   };
 
   const loadSession = async (sessionId: string) => {
@@ -104,7 +113,10 @@ export default function ChatClient({ userEmail }: { userEmail: string | null }) 
         // Close sidebar on mobile after selection
         if (window.innerWidth < 1024) setIsSidebarOpen(false);
       }
-    } catch(e) { console.error("Failed to load session messages", e); }
+    } catch (error: unknown) {
+      const err = error as { message?: string };
+      console.error("Failed to load session messages", err.message);
+    }
   };
 
   const toggleSection = (section: "history" | "documents" | "settings") => {
@@ -209,9 +221,10 @@ export default function ChatClient({ userEmail }: { userEmail: string | null }) 
       } else {
         throw new Error(payload.error || payload.message || "Failed to upload document");
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const error = err as { message?: string };
       console.error(err);
-      alert(`Error uploading document: ${err.message}`);
+      alert(`Error uploading document: ${error.message ?? 'Unknown error'}`);
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) {
@@ -278,7 +291,10 @@ export default function ChatClient({ userEmail }: { userEmail: string | null }) 
               if (parsedMeta.sessionId && !currentSessionId) {
                  setCurrentSessionId(parsedMeta.sessionId);
               }
-            } catch(e) {}
+            } catch (error: unknown) {
+              // Ignore metadata parsing errors
+              void error;
+            }
 
             const remainingText = buffer.slice(splitPoint + 2);
             setMessages((prev) =>
@@ -580,7 +596,7 @@ export default function ChatClient({ userEmail }: { userEmail: string | null }) 
             </div>
           ) : (
             <AnimatePresence mode="popLayout">
-              {messages.map((msg, i) => (
+              {messages.map((msg) => (
                 <motion.div
                   key={msg.id}
                   initial={{ y: 20, opacity: 0, scale: 0.95 }}
