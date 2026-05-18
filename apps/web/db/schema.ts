@@ -1,4 +1,5 @@
 import {
+  index,
   pgTable,
   text,
   timestamp,
@@ -26,7 +27,10 @@ export const documents = pgTable('documents', {
   content: text('content'),
   metadata: jsonb('metadata'),
   embedding: vector('embedding'),
-});
+}, (table) => ({
+  embeddingIndex: index('embeddingIndex')
+    .using('hnsw', table.embedding.op('vector_cosine_ops'))
+}));
 
 export const evaluationRuns = pgTable('evaluation_runs', {
   id: uuid('id').primaryKey().defaultRandom(),
