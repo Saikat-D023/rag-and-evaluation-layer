@@ -17,6 +17,8 @@ A scalable **Retrieval-Augmented Generation (RAG)** system built as a Turborepo 
 
 ## 🎬 Demo
 
+**🌐 Live Application:** [https://rag-and-evaluation-layer-web.vercel.app/](https://rag-and-evaluation-layer-web.vercel.app/)
+
 ### Live Chat Demo
 ![Demo GIF](apps/web/public/demo.gif)
 

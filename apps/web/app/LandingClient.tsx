@@ -79,7 +79,7 @@ export default function LandingClient({ user }: { user: unknown }) {
           {["Product", "Features", "Pricing", "Docs"].map((item) => (
             <Link 
               key={item}
-              href={`#${item.toLowerCase()}`} 
+              href={item === "Docs" ? "/coming-soon" : `#${item.toLowerCase()}`} 
               className="relative group overflow-hidden"
             >
               <span className="group-hover:text-[#92B57A] transition-colors">{item}</span>
@@ -473,7 +473,7 @@ export default function LandingClient({ user }: { user: unknown }) {
               <li>✓ Eval Pipeline</li>
             </ul>
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-              <Link href="/signup" className="block text-center w-full py-6 bg-[#1A1A1A] text-white font-black uppercase tracking-widest text-xs rounded-full hover:bg-white hover:text-black transition-all">
+              <Link href="/coming-soon" className="block text-center w-full py-6 bg-[#1A1A1A] text-white font-black uppercase tracking-widest text-xs rounded-full hover:bg-white hover:text-black transition-all">
                 Go Pro
               </Link>
             </motion.div>
@@ -493,7 +493,7 @@ export default function LandingClient({ user }: { user: unknown }) {
               <li>✓ On-premise option</li>
             </ul>
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-              <Link href="#contact" className="block text-center w-full py-5 bg-transparent border-2 border-[#1A1A1A] font-black uppercase tracking-widest text-xs rounded-full hover:bg-[#1A1A1A] hover:text-white transition-all">
+              <Link href="/coming-soon" className="block text-center w-full py-5 bg-transparent border-2 border-[#1A1A1A] font-black uppercase tracking-widest text-xs rounded-full hover:bg-[#1A1A1A] hover:text-white transition-all">
                 Contact Sales
               </Link>
             </motion.div>
@@ -564,15 +564,15 @@ export default function LandingClient({ user }: { user: unknown }) {
             </div>
             <div className="flex flex-col gap-4 text-[10px] font-bold uppercase tracking-[0.2em]">
                <span className="opacity-20 mb-2">Resources</span>
-               <Link href="#" className="hover:text-[#92B57A] transition-colors">Documentation</Link>
-               <Link href="#" className="hover:text-[#92B57A] transition-colors">API Reference</Link>
-               <Link href="#" className="hover:text-[#92B57A] transition-colors">Community</Link>
+               <Link href="/coming-soon" className="hover:text-[#92B57A] transition-colors">Documentation</Link>
+               <Link href="/coming-soon" className="hover:text-[#92B57A] transition-colors">API Reference</Link>
+               <Link href="/coming-soon" className="hover:text-[#92B57A] transition-colors">Community</Link>
             </div>
             <div className="flex flex-col gap-4 text-[10px] font-bold uppercase tracking-[0.2em]">
                <span className="opacity-20 mb-2">Social</span>
-               <Link href="#" className="hover:text-[#92B57A] transition-colors">Twitter</Link>
-               <Link href="#" className="hover:text-[#92B57A] transition-colors">GitHub</Link>
-               <Link href="#" className="hover:text-[#92B57A] transition-colors">LinkedIn</Link>
+               <Link href="https://x.com/dsaikat5" target="_blank" className="hover:text-[#92B57A] transition-colors">Twitter</Link>
+               <Link href="https://github.com/Saikat-D023" target="_blank" className="hover:text-[#92B57A] transition-colors">GitHub</Link>
+               <Link href="https://www.linkedin.com/in/saikatdey232/" target="_blank" className="hover:text-[#92B57A] transition-colors">LinkedIn</Link>
             </div>
           </div>
         </div>
