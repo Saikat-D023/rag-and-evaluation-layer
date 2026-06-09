@@ -17,7 +17,7 @@ async function checkDb() {
   const docs = await sql`SELECT id, user_id, content FROM documents`;
   console.log(`Found ${docs.length} documents.`);
   if (docs.length > 0) {
-    console.log("Sample doc:", docs[0].id, docs[0].user_id, docs[0].content.substring(0, 50));
+    console.log("Sample doc:", docs[0]?.id, docs[0]?.user_id, docs[0]?.content?.substring(0, 50));
   }
 
   const profiles = await sql`SELECT id, email FROM profiles`;
