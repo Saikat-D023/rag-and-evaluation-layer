@@ -3,12 +3,10 @@ import { retrieveHybrid } from "@repo/rag-core";
 import { NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { db } from "@/db";
-import { chatSessions, chatMessages } from "@/db/schema";
+import { chatSessions, chatMessages, profiles } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-});
+// Local OpenAI instances will be created using the provided user apiKey
 
 export async function POST(req: Request) {
     const supabase = await createClient();
@@ -20,6 +18,16 @@ export async function POST(req: Request) {
 
     try {
         const { messages, sessionId: providedSessionId } = await req.json();
+
+        const profileRecord = await db.query.profiles.findFirst({
+            where: eq(profiles.id, user.id)
+        });
+        const apiKey = profileRecord?.openaiApiKey || null;
+        
+        if (!apiKey && !process.env.OPENAI_API_KEY) {
+            return NextResponse.json({ error: "OpenAI API key is required. Please set it in the Settings." }, { status: 400 });
+        }
+
         const lastMessage = messages[messages.length - 1].content;
         
         // 1. Handle Session
@@ -55,7 +63,7 @@ export async function POST(req: Request) {
         });
 
         // 3. Get the facts using your Hybrid logic
-        const contextResults = await retrieveHybrid(lastMessage, 3, user.id) as Array<{ id: string; content: string; metadata?: { source?: string; chunkIndex?: number } }>;
+        const contextResults = await retrieveHybrid(lastMessage, 3, user.id, apiKey || undefined) as Array<{ id: string; content: string; metadata?: { source?: string; chunkIndex?: number } }>;
 
         // 4. Format context and extract citation metadata
         const contextText = contextResults
@@ -69,6 +77,7 @@ export async function POST(req: Request) {
         }));
 
         // 5. Create a Stream
+        const openai = new OpenAI({ apiKey: apiKey || process.env.OPENAI_API_KEY });
         const stream = await openai.chat.completions.create({
             model: "gpt-4o-mini",
             messages: [
@@ -121,10 +130,8 @@ export async function POST(req: Request) {
 
         return new Response(customStream);
 
-    } catch (error) {
-        if (error instanceof Error) {
-            return NextResponse.json({ error: error.message }, { status: 500 });
-        }
-        return NextResponse.json({ error: "An unknown error occurred" }, { status: 500 });
+    } catch (error: any) {
+        console.error("CHAT ERROR:", error);
+        return NextResponse.json({ error: error?.message || String(error), details: error }, { status: 500 });
     }
 }

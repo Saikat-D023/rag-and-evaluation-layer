@@ -9,9 +9,8 @@ import { supabase } from './supabase';
 // 2. Re-export everything from supabase so it's accessible externally
 export * from './supabase';
 
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-});
+// The OpenAI client will be instantiated locally per function using the provided apiKey
+// fallback to env is handled locally if needed.
 
 // --- Logic remains the same, but uses the imported 'supabase' ---
 
@@ -60,7 +59,8 @@ export const insertChunks = async (chunks: Chunk[], userId?: string) => {
     return data;
 };
 
-export const generateEmbeddings = async (text: string) => {
+export const generateEmbeddings = async (text: string, apiKey?: string) => {
+    const openai = new OpenAI({ apiKey: apiKey || process.env.OPENAI_API_KEY });
     const response = await openai.embeddings.create({
         model: "text-embedding-3-small",
         input: text,
@@ -68,11 +68,11 @@ export const generateEmbeddings = async (text: string) => {
     return response.data[0]?.embedding;
 };
 
-export const syncChunksWithEmbeddings = async (chunks: Chunk[], userId?: string) => {
+export const syncChunksWithEmbeddings = async (chunks: Chunk[], userId?: string, apiKey?: string) => {
     console.log(`Generating embeddings for ${chunks.length} chunks...`);
     const enrichedChunks = await Promise.all(
         chunks.map(async (chunk) => {
-            const embedding = await generateEmbeddings(chunk.text);
+            const embedding = await generateEmbeddings(chunk.text, apiKey);
             return {
                 id: chunk.id,
                 user_id: userId,
@@ -88,11 +88,11 @@ export const syncChunksWithEmbeddings = async (chunks: Chunk[], userId?: string)
     if (error) throw error;
 };
 
-export const retrieveRelevantChunks = async (query: string, limit = 3, userId?: string) => {
-    const queryEmbedding = await generateEmbeddings(query);
+export const retrieveRelevantChunks = async (query: string, limit = 3, userId?: string, apiKey?: string) => {
+    const queryEmbedding = await generateEmbeddings(query, apiKey);
     const { data, error } = await supabase.rpc('match_documents', {
         query_embedding: queryEmbedding,
-        match_threshold: 0.3,
+        match_threshold: 0.15,
         match_count: limit,
         p_user_id: userId, // Assuming RPC is updated or handles null
     });
@@ -100,12 +100,13 @@ export const retrieveRelevantChunks = async (query: string, limit = 3, userId?: 
     return data;
 };
 
-export const generateAnswer = async (query: string, userId?: string) => {
-    const contextChunks = await retrieveRelevantChunks(query, 2, userId);
+export const generateAnswer = async (query: string, userId?: string, apiKey?: string) => {
+    const contextChunks = await retrieveRelevantChunks(query, 2, userId, apiKey);
     if (!contextChunks || contextChunks.length === 0) {
         return "I'm sorry, I couldn't find any relevant information in the database.";
     }
     const contextText = contextChunks.map((c: any) => c.content).join("\n\n");
+    const openai = new OpenAI({ apiKey: apiKey || process.env.OPENAI_API_KEY });
     const response = await openai.chat.completions.create({
         model: "gpt-4o-mini",
         messages: [
@@ -120,9 +121,9 @@ export const generateAnswer = async (query: string, userId?: string) => {
     return response.choices[0]?.message?.content;
 };
 
-export const retrieveHybrid = async (query: string, limit = 3, userId?: string) => {
+export const retrieveHybrid = async (query: string, limit = 3, userId?: string, apiKey?: string) => {
     // 1. Get results from Supabase
-    const vectorResults = await retrieveRelevantChunks(query, 10, userId);
+    const vectorResults = await retrieveRelevantChunks(query, 10, userId, apiKey);
 
     if (vectorResults.length < 3) {
         return vectorResults.slice(0, limit);
@@ -148,6 +149,10 @@ export const retrieveHybrid = async (query: string, limit = 3, userId?: string) 
     try {
         engine.consolidate();
         const results = engine.search(query);
+
+        if (results.length === 0) {
+            return vectorResults.slice(0, limit);
+        }
 
         return results
             .map((item: any) => {

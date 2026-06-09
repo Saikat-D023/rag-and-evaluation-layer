@@ -54,6 +54,8 @@ export const queryLogs = pgTable('query_logs', {
 export const profiles = pgTable('profiles', {
   id: uuid('id').primaryKey().notNull(),
   fullName: text('full_name'),
+  email: text('email'),
+  openaiApiKey: text('openai_api_key'),
   updatedAt: timestamp('updated_at').defaultNow(),
 });
 

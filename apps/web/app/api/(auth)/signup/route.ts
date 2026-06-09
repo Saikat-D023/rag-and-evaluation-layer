@@ -14,7 +14,6 @@ export async function POST(req: Request) {
             process.env.SUPABASE_SERVICE_ROLE_KEY!,
             {
                 auth: {
-                    autoConfirm: true,
                     persistSession: false
                 }
             }
@@ -39,6 +38,7 @@ export async function POST(req: Request) {
                 await db.insert(profiles).values({
                     id: data.user.id,
                     fullName: fullName,
+                    email: email,
                 });
                 console.log('Profile created for user:', data.user.id);
             } catch (dbError: unknown) {

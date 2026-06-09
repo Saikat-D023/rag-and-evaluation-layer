@@ -34,6 +34,48 @@ export default function ChatClient({ userEmail }: { userEmail: string | null }) 
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
+  const [apiKey, setApiKey] = useState("");
+  const [showApiKeyModal, setShowApiKeyModal] = useState(false);
+  const [tempApiKey, setTempApiKey] = useState("");
+
+  useEffect(() => {
+    if (userEmail) {
+      fetch('/api/user/key')
+        .then(res => res.json())
+        .then(data => {
+           if (data.apiKey) {
+              setApiKey(data.apiKey);
+              setTempApiKey(data.apiKey);
+           }
+        })
+        .catch(err => console.error("Failed to load API key", err));
+    }
+  }, [userEmail]);
+
+  const saveApiKey = async () => {
+    if (!userEmail) {
+      setShowAuthModal(true);
+      setShowApiKeyModal(false);
+      return;
+    }
+    try {
+      const res = await fetch('/api/user/key', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ apiKey: tempApiKey })
+      });
+      if (res.ok) {
+        setApiKey(tempApiKey);
+        setShowApiKeyModal(false);
+      } else {
+        alert("Failed to save API key securely.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Failed to save API key.");
+    }
+  };
+
   const [isUploading, setIsUploading] = useState(false);
   const [loadingLabel, setLoadingLabel] = useState(STREAMING_STAGES[0]);
   
@@ -195,6 +237,11 @@ export default function ChatClient({ userEmail }: { userEmail: string | null }) 
     const file = e.target.files?.[0];
     if (!file) return;
 
+    if (!apiKey) {
+      setShowApiKeyModal(true);
+      return;
+    }
+
     setIsUploading(true);
     const formData = new FormData();
     formData.append("file", file);
@@ -236,6 +283,11 @@ export default function ChatClient({ userEmail }: { userEmail: string | null }) 
   const handleSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!input.trim() || isStreaming) return;
+
+    if (!apiKey) {
+      setShowApiKeyModal(true);
+      return;
+    }
 
     const userMsg: Message = {
       id: crypto.randomUUID(),
@@ -493,6 +545,15 @@ export default function ChatClient({ userEmail }: { userEmail: string | null }) 
                  <div className="space-y-1">
                    <span className="font-black uppercase text-[8px] opacity-40 tracking-[0.2em]">Search Strategy</span>
                    <div className="font-bold">Hybrid (BM25 + Vector)</div>
+                 </div>
+                 <div className="space-y-1 mt-4 border-t-2 border-[#1A1A1A] pt-4">
+                   <span className="font-black uppercase text-[8px] opacity-40 tracking-[0.2em]">OpenAI API Key</span>
+                   <div className="flex justify-between items-center mt-1">
+                     <div className="font-bold font-mono tracking-tight text-xs bg-black/5 px-2 py-1 truncate max-w-[150px]">
+                       {apiKey ? `sk-...${apiKey.slice(-4)}` : 'Not Set'}
+                     </div>
+                     <button onClick={() => { setTempApiKey(apiKey); setShowApiKeyModal(true); }} className="bg-[#1A1A1A] text-white px-3 py-1.5 text-[8px] font-black uppercase hover:bg-[#92B57A] transition-colors shadow-[2px_2px_0px_0px_rgba(146,181,122,1)]">Edit</button>
+                   </div>
                  </div>
               </motion.div>
             )}
@@ -784,6 +845,61 @@ export default function ChatClient({ userEmail }: { userEmail: string | null }) 
           </div>
         )}
       </AnimatePresence>
+
+      {/* API KEY MODAL */}
+      <AnimatePresence>
+        {showApiKeyModal && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowApiKeyModal(false)}
+              className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="bg-white border-4 border-[#1A1A1A] p-8 sm:p-12 max-w-md w-full relative z-[101] shadow-[12px_12px_0px_0px_rgba(26,26,26,1)]"
+            >
+              <button 
+                onClick={() => setShowApiKeyModal(false)}
+                className="absolute top-4 right-4 text-2xl font-black hover:text-[#92B57A] transition-colors"
+              >
+                ×
+              </button>
+              <div className="text-center space-y-6">
+                <div className="w-16 h-16 bg-[#F9F8F3] border-2 border-[#1A1A1A] mx-auto flex items-center justify-center">
+                   <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M2 18v3c0 .6.4 1 1 1h4v-3h3v-3h2l1.4-1.4a6.5 6.5 0 1 0-4-4Z"></path><circle cx="16.5" cy="7.5" r=".5" fill="currentColor"></circle></svg>
+                </div>
+                <h3 className="font-display font-black text-3xl uppercase tracking-tighter leading-none">
+                  API KEY <span className="text-[#92B57A]">REQUIRED</span>
+                </h3>
+                <p className="font-bold text-sm uppercase tracking-widest opacity-60 leading-relaxed">
+                  Please enter your OpenAI API Key to continue. Your key is stored securely in your profile and used for AI features.
+                </p>
+                <div className="pt-4 space-y-4">
+                  <input
+                    type="password"
+                    placeholder="sk-..."
+                    value={tempApiKey}
+                    onChange={(e) => setTempApiKey(e.target.value)}
+                    className="w-full bg-[#F9F8F3] border-2 border-[#1A1A1A] px-6 py-4 focus:outline-none focus:ring-0 font-bold placeholder:opacity-30 transition-all text-sm uppercase tracking-tight"
+                  />
+                  <button 
+                    onClick={saveApiKey}
+                    className="block w-full bg-[#1A1A1A] text-white font-black uppercase py-4 tracking-widest text-xs hover:bg-[#92B57A] transition-all shadow-[4px_4px_0px_0px_rgba(146,181,122,1)]"
+                  >
+                    Save Key
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
     </div>
   );
 }
